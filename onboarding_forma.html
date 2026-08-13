@@ -175,6 +175,7 @@
     <div class="sec-head"><div class="sec-title">Duomenys iš HR · <span class="sum-badge">tik peržiūra</span></div></div>
     <div class="sum-grid">
       <div class="sum-item"><span class="k">Darbuotojas</span><span class="v" id="s_vardas">—</span></div>
+      <div class="sum-item"><span class="k">Pareigos</span><span class="v" id="s_pareigos">—</span></div>
       <div class="sum-item"><span class="k">Tabelio nr.</span><span class="v" id="s_tabelio">—</span></div>
       <div class="sum-item"><span class="k">Tiesioginis vadovas</span><span class="v" id="s_vadovas">—</span></div>
       <div class="sum-item"><span class="k">Darbo pradžia</span><span class="v" id="s_data">—</span></div>
@@ -192,7 +193,7 @@
 
       <div class="field">
         <label>Darbo vietos vieta <span class="req">*</span><br><span class="lt">Workplace location</span></label>
-        <input type="text" id="f_vieta" placeholder="pvz. Biuras, 2 aukštas / Gamybos cechas" autocomplete="off">
+        <input type="text" id="f_vieta" autocomplete="off">
       </div>
 
       <div class="field">
@@ -206,18 +207,18 @@
       <div class="field">
         <label>Papildomos pašto dėžutės<br><span class="lt">Additional mailboxes</span></label>
         <div class="hint">Bendros dėžutės, prie kurių reikės prieigos. Palikite tuščią, jei nereikia.</div>
-        <textarea id="f_dezutes" rows="2" placeholder="pvz. info@iremas.lt, invoice@iremas.lt"></textarea>
+        <textarea id="f_dezutes" rows="2"></textarea>
       </div>
 
       <div class="field">
         <label>Papildoma įranga<br><span class="lt">Additional equipment</span></label>
-        <textarea id="f_iranga" rows="2" placeholder="pvz. 2-as monitorius, ausinės su mikrofonu, dokstotis"></textarea>
+        <textarea id="f_iranga" rows="2"></textarea>
       </div>
 
       <div class="field">
         <label>Specifinės programos<br><span class="lt">Specific software</span></label>
         <div class="hint">Programos, kurių neturi standartinis kompiuteris.</div>
-        <textarea id="f_programos" rows="2" placeholder="pvz. AutoCAD, TEKLA Structures"></textarea>
+        <textarea id="f_programos" rows="2"></textarea>
       </div>
 
       <div class="field">
@@ -247,8 +248,8 @@
 const CLIENT_ID   = '413e4a48-f490-47b2-a36d-3d4039c87f9e';
 const TENANT_ID   = 'f300c84f-87f0-4d9e-8284-1e36dbe06fbe';
 const REDIRECT_URI = window.location.origin + window.location.pathname;
-const SP_SITE_URL = 'https://achemosgrupelt.sharepoint.com/sites/MBL';   // ⚠ tas pats site kaip HR formoje
-const SP_LIST_NAME = 'Onboarding_uzklausos';
+const SP_SITE_URL = 'https://achemosgrupelt.sharepoint.com/sites/IremasOnboarding';   // tas pats site kaip HR formoje
+const SP_LIST_NAME = 'Onboarding_list';
 const SP_SCOPES   = ['https://achemosgrupelt.sharepoint.com/AllSites.Read', 'https://achemosgrupelt.sharepoint.com/AllSites.Write'];
 const DEV_SKIP = false;
 
@@ -342,7 +343,7 @@ async function updateItem(token, id, fields){
 async function onReady(){
   if(!ITEM_ID){ el('noticeCard').classList.add('show'); return; }
   if(DEV_SKIP){
-    el('s_vardas').textContent='Jonas Jonaitis'; el('s_tabelio').textContent='10482';
+    el('s_vardas').textContent='Jonas Jonaitis'; el('s_pareigos').textContent='Konstruktorius'; el('s_tabelio').textContent='10482';
     el('s_vadovas').textContent='Petras Petraitis'; el('s_data').textContent='2026-09-01';
     el('summaryCard').style.display=''; el('formCard').style.display=''; return;
   }
@@ -355,6 +356,7 @@ async function onReady(){
     const val = (title) => { const int = map[title.toLowerCase()] || title; return d[int] ?? ''; };
     const fmtDate = (v) => v ? String(v).slice(0,10) : '—';
     el('s_vardas').textContent  = `${val('Vardas')} ${val('Pavarde')}`.trim() || (val('Title') || '—');
+    el('s_pareigos').textContent = val('Pareigos') || '—';
     el('s_tabelio').textContent = val('TabelioNr') || '—';
     el('s_vadovas').textContent = val('VadovoVardas') || '—';
     el('s_data').textContent    = fmtDate(val('DarboPradzia'));
