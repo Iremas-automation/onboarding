@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naujas darbuotojas – HR registracija</title>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"></script>
+<style>
+  :root{
+    --bg:#eef0f2;--surface:#ffffff;--ink:#1a1c1f;
+    --orange:#e8640a;--orange-dim:#c25509;
+    --muted:#6b7280;--border:#d8dce1;
+    --red:#c0392b;--green:#1e7e4a;
+    --radius:3px;--font:'Segoe UI',system-ui,sans-serif;
+    --shadow:0 8px 24px rgba(0,0,0,0.06);
+    --header-bg:#1a1c1f;--header-text:#fff;--header-muted:rgba(255,255,255,.5);
+  }
+  [data-theme="dark"]{
+    --bg:#15171a;--surface:#1e2125;--ink:#e4e6ea;
+    --orange:#e8640a;--orange-dim:#ff8a3d;
+    --muted:#8b919c;--border:#2d3138;
+    --red:#e2716a;--green:#3fae72;
+    --shadow:0 8px 24px rgba(0,0,0,0.4);
+    --header-bg:#0e0f11;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:40px;transition:background .2s,color .2s;}
+
+  .header{background:var(--header-bg);color:var(--header-text);}
+  .header-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;}
+  .logo{display:flex;align-items:center;gap:12px;}
+  .logo-mark{width:34px;height:34px;background:var(--orange);border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;}
+  .logo-name{font-size:14px;font-weight:600;}
+  .logo-sub{font-size:11px;color:var(--header-muted);}
+  .header-right{display:flex;align-items:center;gap:10px;}
+  .theme-toggle{width:30px;height:30px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:var(--header-text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .theme-toggle:hover{background:rgba(255,255,255,0.12);}
+
+  .login-overlay{position:fixed;inset:0;background:var(--header-bg);z-index:300;display:flex;align-items:center;justify-content:center;}
+  .login-overlay.hidden{display:none;}
+  .login-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:40px 44px;text-align:center;max-width:380px;width:90%;box-shadow:var(--shadow);}
+  .login-logo{width:46px;height:46px;background:var(--orange);border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;margin:0 auto 16px;}
+  .login-card h2{font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;}
+  .login-card p{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+  .btn-ms{display:flex;align-items:center;gap:10px;background:#0078d4;color:#fff;border:none;border-radius:3px;padding:11px 20px;font-size:14px;font-weight:500;cursor:pointer;width:100%;justify-content:center;font-family:var(--font);transition:background .15s;}
+  .btn-ms:hover{background:#006cbd;}
+  .user-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:4px 10px 4px 4px;}
+  .user-avatar{width:24px;height:24px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+  .user-name{font-size:12px;color:var(--header-text);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .btn-logout{background:none;border:none;color:var(--header-muted);font-size:12px;cursor:pointer;padding:2px 4px;}
+  .btn-logout:hover{color:var(--header-text);}
+
+  .page-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;}
+  .page-title{font-size:16px;font-weight:600;color:var(--ink);}
+  .page-meta{font-size:11px;color:var(--muted);text-align:right;line-height:1.6;}
+
+  .form-body{max-width:520px;margin:28px auto 0;padding:0 20px;}
+  .intro{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:var(--radius);padding:12px 16px;}
+  .section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden;}
+  .sec-head{border-left:3px solid var(--orange);padding:12px 22px;}
+  .sec-title{font-size:12px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.06em;}
+  .sec-body{padding:20px 22px;display:flex;flex-direction:column;gap:18px;}
+
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;line-height:1.3;}
+  .field label .lt{font-weight:400;opacity:.75;text-transform:none;}
+  .req{color:var(--orange);}
+  .field input{font-family:var(--font);font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;width:100%;transition:border-color .15s,box-shadow .15s;}
+  .field input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(232,100,10,.14);}
+  .field input.invalid{border-color:var(--red);box-shadow:0 0 0 3px rgba(192,57,43,.12);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  .form-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:2px;}
+  .btn{font-family:var(--font);font-size:14px;font-weight:600;padding:11px 24px;border-radius:var(--radius);cursor:pointer;border:none;transition:all .15s;}
+  .btn-sec{background:var(--surface);border:1px solid var(--border);color:var(--muted);}
+  .btn-sec:hover{border-color:var(--orange-dim);color:var(--orange-dim);}
+  .btn-pri{background:var(--orange);color:#fff;}
+  .btn-pri:hover{background:var(--orange-dim);}
+  .btn-pri:disabled{background:var(--muted);cursor:not-allowed;}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);padding:12px 20px;border-radius:var(--radius);font-size:14px;font-weight:500;color:#fff;z-index:200;opacity:0;transition:all .3s;pointer-events:none;box-shadow:var(--shadow);max-width:92%;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.success{background:var(--green);}
+  .toast.error{background:var(--red);}
+  .toast.info{background:var(--muted);}
+
+  .done{display:none;text-align:center;padding:40px 24px;}
+  .done.show{display:block;}
+  .done .ico{width:56px;height:56px;border-radius:50%;background:rgba(30,126,74,.14);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;}
+  .done h3{font-size:17px;color:var(--ink);margin-bottom:6px;}
+  .done p{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px;}
+
+  @media(max-width:600px){
+    .header-inner,.page-bar{padding:12px 16px;}
+    .form-body{padding:0 12px;margin-top:18px;}
+    .sec-body{padding:16px 14px;}
+    .grid2{grid-template-columns:1fr;}
+    .form-footer{flex-direction:column-reverse;}
+    .btn{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo">HR</div>
+    <h2>Naujo darbuotojo registracija</h2>
+    <p>Prisijunkite su savo Iremas Microsoft paskyra, kad galėtumėte registruoti darbuotoją.</p>
+    <button class="btn-ms" onclick="signIn()">
+      <svg width="20" height="20" viewBox="0 0 21 21" fill="none"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+      Prisijungti su Microsoft
+    </button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">HR</div>
+      <div>
+        <div class="logo-name">UAB Iremas</div>
+        <div class="logo-sub">Naujo darbuotojo registracija</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="user-pill" id="userBadge" style="display:none;">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span class="user-name" id="userName">...</span>
+        <button class="btn-logout" onclick="signOut()" title="Atsijungti">✕</button>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Tamsus / šviesus režimas">🌙</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-bar">
+  <div class="page-title">HR registracija</div>
+  <div class="page-meta">IT · Onboarding · 1/2</div>
+</div>
+
+<div class="form-body">
+
+  <div class="section" id="formCard">
+    <div class="sec-head"><div class="sec-title">Pagrindiniai duomenys / Basic Data</div></div>
+    <div class="sec-body">
+
+      <div class="intro">
+        Užregistruokite naują darbuotoją. Pateikus, tiesioginis vadovas gaus el. laišką su nuoroda,
+        kad užpildytų likusius IT poreikius (įranga, programos, pašto dėžutės).
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>Vardas <span class="req">*</span><br><span class="lt">First name</span></label>
+          <input type="text" id="f_vardas" placeholder="pvz. Jonas" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Pavardė <span class="req">*</span><br><span class="lt">Last name</span></label>
+          <input type="text" id="f_pavarde" placeholder="pvz. Jonaitis" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tabelio numeris <span class="req">*</span><br><span class="lt">Personnel number</span></label>
+        <input type="text" id="f_tabelio" placeholder="pvz. 10482" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>Tiesioginis vadovas <span class="req">*</span><br><span class="lt">Direct manager — vardas ir pavardė</span></label>
+        <input type="text" id="f_vadovas" placeholder="Vardas Pavardė" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>Vadovo el. paštas <span class="req">*</span><br><span class="lt">Manager email — nuorodai išsiųsti</span></label>
+        <input type="email" id="f_vadovoEmail" placeholder="vardas.pavarde@iremas.lt" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>Darbo pradžia <span class="req">*</span><br><span class="lt">Start date</span></label>
+        <input type="date" id="f_data">
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn-sec" onclick="clearForm()">Išvalyti</button>
+        <button class="btn btn-pri" id="submitBtn" onclick="submitForm()">Registruoti / Register</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section done" id="doneCard">
+    <div class="ico">✓</div>
+    <h3>Darbuotojas užregistruotas</h3>
+    <p>Tiesioginiam vadovui bus išsiųstas el. laiškas su nuoroda IT poreikiams užpildyti.</p>
+    <button class="btn btn-pri" onclick="resetToForm()">Registruoti dar vieną</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────── CONFIG (edit these) ───────────
+const CLIENT_ID   = '413e4a48-f490-47b2-a36d-3d4039c87f9e';   // ⚠ patikrinkite: ta pati ar nauja app registracija
+const TENANT_ID   = 'f300c84f-87f0-4d9e-8284-1e36dbe06fbe';
+const REDIRECT_URI = window.location.origin + window.location.pathname;  // turi būti pridėtas app registracijoje
+const SP_SITE_URL = 'https://achemosgrupelt.sharepoint.com/sites/MBL';   // ⚠ pakeiskite į onboarding sąrašo site'ą
+const SP_LIST_NAME = 'Onboarding_uzklausos';                             // sąrašo pavadinimas (tikslus)
+const SP_SCOPES   = ['https://achemosgrupelt.sharepoint.com/AllSites.Read', 'https://achemosgrupelt.sharepoint.com/AllSites.Write'];
+const DEV_SKIP = false;   // ⚠ DEV ONLY — true: praleidžia login/SharePoint, tik loguoja
+// Pastaba: laišką vadovui siunčia Power Automate srautas ("When an item is created"),
+// todėl formai el. pašto teisių (Mail.Send) NEBEREIKIA.
+
+// ─────────── MSAL ───────────
+const msalInstance = new msal.PublicClientApplication({
+  auth: { clientId: CLIENT_ID, authority: `https://login.microsoftonline.com/${TENANT_ID}`, redirectUri: REDIRECT_URI },
+  cache: { cacheLocation: 'localStorage' }
+});
+let currentUser = null;
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+const LOGIN_SCOPES = ['User.Read', ...SP_SCOPES];
+
+function el(id){ return document.getElementById(id); }
+
+async function initAuth(){
+  if(DEV_SKIP){ currentUser = { name:'Dev HR', username:'dev@iremas.lt' }; showUser(currentUser); el('loginOverlay').classList.add('hidden'); return; }
+  await msalInstance.initialize();
+  try{ const resp = await msalInstance.handleRedirectPromise(); if(resp && resp.account){ handleSignedIn(resp.account); return; } }catch(e){ console.error('Redirect:', e); }
+  const accts = msalInstance.getAllAccounts();
+  if(accts.length) handleSignedIn(accts[0]);
+  else el('loginOverlay').classList.remove('hidden');
+}
+function handleSignedIn(account){
+  currentUser = account; msalInstance.setActiveAccount(account); showUser(account); el('loginOverlay').classList.add('hidden');
+}
+async function signIn(){
+  const request = { scopes: LOGIN_SCOPES };
+  if(IS_MOBILE){ try{ await msalInstance.loginRedirect(request); }catch(e){ alert('Prisijungti nepavyko: ' + e.message); } return; }
+  try{ const resp = await msalInstance.loginPopup(request); handleSignedIn(resp.account); }
+  catch(e){
+    if(['block_nested_popups','popup_window_error','empty_window_error'].includes(e.errorCode)){
+      try{ await msalInstance.loginRedirect(request); }catch(e2){ alert('Prisijungti nepavyko: ' + e2.message); }
+    } else if(e.errorCode !== 'user_cancelled'){ alert('Prisijungti nepavyko: ' + e.message); }
+  }
+}
+function signOut(){
+  const acc = msalInstance.getAllAccounts()[0];
+  if(acc) msalInstance.logoutPopup({ account: acc });
+  currentUser = null; el('userBadge').style.display='none'; el('loginOverlay').classList.remove('hidden');
+}
+function showUser(account){
+  const initials = (account.name||'?').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  el('userAvatar').textContent = initials; el('userName').textContent = account.name; el('userBadge').style.display='flex';
+}
+async function getSpToken(){
+  const request = { scopes: SP_SCOPES, account: currentUser };
+  try{ const r = await msalInstance.acquireTokenSilent(request); return r.accessToken; }
+  catch(e){ if(IS_MOBILE){ await msalInstance.acquireTokenRedirect(request); throw new Error('nukreipiama į prisijungimą, bandykite dar kartą'); } const r = await msalInstance.acquireTokenPopup(request); return r.accessToken; }
+}
+
+// ─────────── SHAREPOINT ───────────
+let _spEntityType = null, _spFieldMap = null;
+async function getListEntityType(token){
+  if(_spEntityType) return _spEntityType;
+  const r = await fetch(`${SP_SITE_URL}/_api/web/lists/getbytitle('${SP_LIST_NAME}')?$select=ListItemEntityTypeFullName`, { headers:{ Authorization:'Bearer '+token, Accept:'application/json;odata=verbose' } });
+  if(!r.ok) throw new Error(`sąrašas „${SP_LIST_NAME}" nerastas (${r.status})`);
+  _spEntityType = (await r.json()).d.ListItemEntityTypeFullName; return _spEntityType;
+}
+async function getFieldMap(token){
+  if(_spFieldMap) return _spFieldMap;
+  const r = await fetch(`${SP_SITE_URL}/_api/web/lists/getbytitle('${SP_LIST_NAME}')/fields?$select=Title,InternalName,ReadOnlyField,Hidden`, { headers:{ Authorization:'Bearer '+token, Accept:'application/json;odata=verbose' } });
+  if(!r.ok) throw new Error(`nepavyko nuskaityti stulpelių (${r.status})`);
+  const j = await r.json(); _spFieldMap = {};
+  for(const f of j.d.results){ if(f.Hidden || f.ReadOnlyField) continue; _spFieldMap[f.Title.trim().toLowerCase()] = f.InternalName; }
+  return _spFieldMap;
+}
+async function createListItem(token, fields){
+  const type = await getListEntityType(token);
+  const map  = await getFieldMap(token);
+  const body = { '__metadata': { 'type': type } };
+  const missing = [];
+  for(const [disp, val] of Object.entries(fields)){
+    const internal = map[disp.toLowerCase()] || (disp === 'Title' ? 'Title' : null);
+    if(internal) body[internal] = val; else missing.push(disp);
+  }
+  if(missing.length) console.warn('Stulpeliai nerasti (praleista):', missing);
+  const r = await fetch(`${SP_SITE_URL}/_api/web/lists/getbytitle('${SP_LIST_NAME}')/items`, {
+    method:'POST',
+    headers:{ Authorization:'Bearer '+token, Accept:'application/json;odata=verbose', 'Content-Type':'application/json;odata=verbose' },
+    body: JSON.stringify(body)
+  });
+  if(!r.ok){ const t = await r.text(); let m = r.status; try{ m = JSON.parse(t)?.error?.message?.value || r.status; }catch{} throw new Error('įrašo klaida: ' + m); }
+  const j = await r.json();
+  return j.d.ID ?? j.d.Id;
+}
+
+// ─────────── SUBMIT ───────────
+let _toastTimer = null;
+function showToast(msg, type){ const t = el('toast'); t.textContent = msg; t.className = 'toast show ' + (type||'info'); clearTimeout(_toastTimer); _toastTimer = setTimeout(()=>{ t.className='toast '+(type||'info'); }, 4500); }
+function markInvalid(n){ n.classList.add('invalid'); }
+function clearInvalid(n){ n.classList.remove('invalid'); }
+
+async function submitForm(){
+  const fields = { vardas:el('f_vardas'), pavarde:el('f_pavarde'), tabelio:el('f_tabelio'), vadovas:el('f_vadovas'), vadovoEmail:el('f_vadovoEmail'), data:el('f_data') };
+  Object.values(fields).forEach(clearInvalid);
+  let valid = true;
+  for(const node of Object.values(fields)){ if(!node.value.trim()){ markInvalid(node); valid = false; } }
+  const email = fields.vadovoEmail.value.trim();
+  if(email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ markInvalid(fields.vadovoEmail); valid = false; }
+  if(!valid){ showToast('Užpildykite privalomus laukus (*)', 'error'); return; }
+
+  const vardas = fields.vardas.value.trim(), pavarde = fields.pavarde.value.trim();
+
+  if(DEV_SKIP){ console.log('[DEV] createItem:', { vardas, pavarde, to:email }); showToast('✓ [DEV] Patikrinta (neišsaugota)', 'success'); setTimeout(showDone, 900); return; }
+
+  const btn = el('submitBtn'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Registruojama…';
+  try{
+    const token = await getSpToken();
+    await createListItem(token, {
+      Title:        `${vardas} ${pavarde}`,
+      Vardas:       vardas,
+      Pavarde:      pavarde,
+      TabelioNr:    fields.tabelio.value.trim(),
+      VadovoVardas: fields.vadovas.value.trim(),
+      VadovoEmail:  email,
+      DarboPradzia: fields.data.value,   // YYYY-MM-DD
+      Busena:       'Laukiama vadovo'
+    });
+    // Laišką vadovui išsiųs Power Automate srautas, suveikęs sukūrus įrašą.
+    showDone();
+  }catch(e){
+    showToast('Klaida: ' + e.message, 'error');
+  }finally{
+    btn.disabled = false; btn.innerHTML = 'Registruoti / Register';
+  }
+}
+
+function showDone(){ el('formCard').style.display='none'; el('doneCard').classList.add('show'); window.scrollTo({top:0,behavior:'smooth'}); }
+function resetToForm(){ clearForm(); el('doneCard').classList.remove('show'); el('formCard').style.display=''; }
+function clearForm(){ ['f_vardas','f_pavarde','f_tabelio','f_vadovas','f_vadovoEmail','f_data'].forEach(id=>{ const n=el(id); n.value=''; clearInvalid(n); }); }
+
+function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); el('themeBtn').textContent = t==='dark'?'☀️':'🌙'; localStorage.setItem('ire-onboarding-theme', t); }
+function toggleTheme(){ const c = document.documentElement.getAttribute('data-theme')||'light'; applyTheme(c==='dark'?'light':'dark'); }
+applyTheme(localStorage.getItem('ire-onboarding-theme') || 'light');
+
+initAuth();
+</script>
+</body>
+</html>
