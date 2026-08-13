@@ -155,17 +155,22 @@
       <div class="grid2">
         <div class="field">
           <label>Vardas <span class="req">*</span><br><span class="lt">First name</span></label>
-          <input type="text" id="f_vardas" placeholder="pvz. Jonas" autocomplete="off">
+          <input type="text" id="f_vardas" autocomplete="off">
         </div>
         <div class="field">
           <label>Pavardė <span class="req">*</span><br><span class="lt">Last name</span></label>
-          <input type="text" id="f_pavarde" placeholder="pvz. Jonaitis" autocomplete="off">
+          <input type="text" id="f_pavarde" autocomplete="off">
         </div>
       </div>
 
       <div class="field">
         <label>Tabelio numeris <span class="req">*</span><br><span class="lt">Personnel number</span></label>
-        <input type="text" id="f_tabelio" placeholder="pvz. 10482" autocomplete="off">
+        <input type="text" id="f_tabelio" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>Pareigos <span class="req">*</span><br><span class="lt">Position</span></label>
+        <input type="text" id="f_pareigos" autocomplete="off">
       </div>
 
       <div class="field">
@@ -304,7 +309,7 @@ function markInvalid(n){ n.classList.add('invalid'); }
 function clearInvalid(n){ n.classList.remove('invalid'); }
 
 async function submitForm(){
-  const fields = { vardas:el('f_vardas'), pavarde:el('f_pavarde'), tabelio:el('f_tabelio'), vadovas:el('f_vadovas'), vadovoEmail:el('f_vadovoEmail'), data:el('f_data') };
+  const fields = { vardas:el('f_vardas'), pavarde:el('f_pavarde'), tabelio:el('f_tabelio'), pareigos:el('f_pareigos'), vadovas:el('f_vadovas'), vadovoEmail:el('f_vadovoEmail'), data:el('f_data') };
   Object.values(fields).forEach(clearInvalid);
   let valid = true;
   for(const node of Object.values(fields)){ if(!node.value.trim()){ markInvalid(node); valid = false; } }
@@ -324,6 +329,7 @@ async function submitForm(){
       Vardas:       vardas,
       Pavarde:      pavarde,
       TabelioNr:    fields.tabelio.value.trim(),
+      Pareigos:     fields.pareigos.value.trim(),
       VadovoVardas: fields.vadovas.value.trim(),
       VadovoEmail:  email,
       DarboPradzia: fields.data.value,   // YYYY-MM-DD
@@ -340,7 +346,7 @@ async function submitForm(){
 
 function showDone(){ el('formCard').style.display='none'; el('doneCard').classList.add('show'); window.scrollTo({top:0,behavior:'smooth'}); }
 function resetToForm(){ clearForm(); el('doneCard').classList.remove('show'); el('formCard').style.display=''; }
-function clearForm(){ ['f_vardas','f_pavarde','f_tabelio','f_vadovas','f_vadovoEmail','f_data'].forEach(id=>{ const n=el(id); n.value=''; clearInvalid(n); }); }
+function clearForm(){ ['f_vardas','f_pavarde','f_tabelio','f_pareigos','f_vadovas','f_vadovoEmail','f_data'].forEach(id=>{ const n=el(id); n.value=''; clearInvalid(n); }); }
 
 function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); el('themeBtn').textContent = t==='dark'?'☀️':'🌙'; localStorage.setItem('ire-onboarding-theme', t); }
 function toggleTheme(){ const c = document.documentElement.getAttribute('data-theme')||'light'; applyTheme(c==='dark'?'light':'dark'); }
