@@ -193,7 +193,7 @@
 
       <div class="field">
         <label>Darbo vieta <span class="req">*</span><br><span class="lt">Workplace location</span></label>
-        <input type="text" id="f_vieta" autocomplete="off">
+        <input type="text" id="f_vieta" placeholder="320 kab." autocomplete="off">
       </div>
 
       <div class="field">
@@ -403,7 +403,18 @@ async function onReady(){
       await showAlready(spToken);
       return;
     }
-    const fmtDate = (v) => v ? String(v).slice(0,10) : '—';
+    const fmtDate = (v) => {
+      if(!v) return '—';
+      const d = new Date(v);
+      if(isNaN(d.getTime())) return String(v).slice(0,10);
+      try{
+        // yyyy-MM-dd Vilniaus laiku (SharePoint saugo datą kaip vietinę vidurnaktį UTC formatu)
+        return new Intl.DateTimeFormat('sv-SE', { timeZone:'Europe/Vilnius', year:'numeric', month:'2-digit', day:'2-digit' }).format(d);
+      }catch(e){
+        const p = n => String(n).padStart(2,'0');
+        return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+      }
+    };
     el('s_vardas').textContent  = `${val('Vardas')} ${val('Pavarde')}`.trim() || (val('Title') || '—');
     el('s_pareigos').textContent = val('Pareigos') || '—';
     el('s_tabelio').textContent = val('TabelioNr') || '—';
