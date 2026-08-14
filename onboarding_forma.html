@@ -192,7 +192,7 @@
       </div>
 
       <div class="field">
-        <label>Darbo vietos vieta <span class="req">*</span><br><span class="lt">Workplace location</span></label>
+        <label>Darbo vieta <span class="req">*</span><br><span class="lt">Workplace location</span></label>
         <input type="text" id="f_vieta" autocomplete="off">
       </div>
 
@@ -253,7 +253,8 @@ const SP_LIST_NAME = 'Onboarding_list';
 const SP_SCOPES   = ['https://achemosgrupelt.sharepoint.com/AllSites.Read', 'https://achemosgrupelt.sharepoint.com/AllSites.Write'];
 const DEV_SKIP = false;
 
-const ITEM_ID = new URLSearchParams(location.search).get('id') || '';
+const REC_TOKEN = new URLSearchParams(location.search).get('t') || '';
+let RECORD_ID = null;   // išsprendžiamas pagal tokeną, naudojamas atnaujinant
 
 // ─────────── MSAL ───────────
 const msalInstance = new msal.PublicClientApplication({
@@ -319,11 +320,16 @@ async function getFieldMap(token){
   for(const f of j.d.results){ if(f.Hidden || f.ReadOnlyField) continue; _spFieldMap[f.Title.trim().toLowerCase()] = f.InternalName; }
   return _spFieldMap;
 }
-async function getItemById(token, id){
-  const r = await fetch(`${SP_SITE_URL}/_api/web/lists/getbytitle('${SP_LIST_NAME}')/items(${id})`, { headers:{ Authorization:'Bearer '+token, Accept:'application/json;odata=verbose' } });
-  if(r.status === 404) return null;
+async function getItemByToken(spToken, tok){
+  const map = await getFieldMap(spToken);
+  const tokenField = map['token'];
+  if(!tokenField) throw new Error('sąraše nėra „Token" stulpelio');
+  const safe = tok.replace(/'/g, "''");
+  const url = `${SP_SITE_URL}/_api/web/lists/getbytitle('${SP_LIST_NAME}')/items?$filter=${tokenField} eq '${safe}'&$top=1`;
+  const r = await fetch(url, { headers:{ Authorization:'Bearer '+spToken, Accept:'application/json;odata=verbose' } });
   if(!r.ok) throw new Error(`įrašo skaitymo klaida (${r.status})`);
-  return (await r.json()).d;
+  const results = (await r.json()).d.results;
+  return (results && results.length) ? results[0] : null;
 }
 async function updateItem(token, id, fields){
   const type = await getListEntityType(token);
@@ -341,18 +347,20 @@ async function updateItem(token, id, fields){
 
 // ─────────── LOAD (prefill from HR record) ───────────
 async function onReady(){
-  if(!ITEM_ID){ el('noticeCard').classList.add('show'); return; }
+  if(!REC_TOKEN){ el('noticeCard').classList.add('show'); return; }
   if(DEV_SKIP){
     el('s_vardas').textContent='Jonas Jonaitis'; el('s_pareigos').textContent='Konstruktorius'; el('s_tabelio').textContent='10482';
     el('s_vadovas').textContent='Petras Petraitis'; el('s_data').textContent='2026-09-01';
+    RECORD_ID = 1;
     el('summaryCard').style.display=''; el('formCard').style.display=''; return;
   }
   el('loadingCard').classList.add('show');
   try{
-    const token = await getSpToken();
-    const map = await getFieldMap(token);
-    const d = await getItemById(token, ITEM_ID);
+    const spToken = await getSpToken();
+    const map = await getFieldMap(spToken);
+    const d = await getItemByToken(spToken, REC_TOKEN);
     if(!d){ el('loadingCard').classList.remove('show'); el('noticeCard').classList.add('show'); return; }
+    RECORD_ID = d.ID ?? d.Id;
     const val = (title) => { const int = map[title.toLowerCase()] || title; return d[int] ?? ''; };
     const fmtDate = (v) => v ? String(v).slice(0,10) : '—';
     el('s_vardas').textContent  = `${val('Vardas')} ${val('Pavarde')}`.trim() || (val('Title') || '—');
@@ -394,12 +402,13 @@ async function submitForm(){
     Busena:              'Pateikta IT'
   };
 
-  if(DEV_SKIP){ console.log('[DEV] updateItem', ITEM_ID, fields); showToast('✓ [DEV] Patikrinta (neišsiųsta)', 'success'); setTimeout(showDone, 900); return; }
+  if(DEV_SKIP){ console.log('[DEV] updateItem', RECORD_ID, fields); showToast('✓ [DEV] Patikrinta (neišsiųsta)', 'success'); setTimeout(showDone, 900); return; }
 
+  if(!RECORD_ID){ showToast('Įrašas neįkeltas — atidarykite formą iš el. laiško nuorodos.', 'error'); return; }
   const btn = el('submitBtn'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Siunčiama…';
   try{
     const token = await getSpToken();
-    await updateItem(token, ITEM_ID, fields);
+    await updateItem(token, RECORD_ID, fields);
     showDone();
   }catch(e){
     showToast('Klaida siunčiant: ' + e.message, 'error');
