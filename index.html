@@ -185,7 +185,7 @@
 
       <div class="field">
         <label>Darbo pradžia <span class="req">*</span><br><span class="lt">Start date</span></label>
-        <input type="text" id="f_data" placeholder="yyyy-mm-dd" inputmode="numeric" maxlength="10" autocomplete="off">
+        <input type="date" id="f_data" lang="lt">
       </div>
 
       <div class="form-footer">
@@ -315,8 +315,6 @@ async function submitForm(){
   for(const node of Object.values(fields)){ if(!node.value.trim()){ markInvalid(node); valid = false; } }
   const email = fields.vadovoEmail.value.trim();
   if(email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ markInvalid(fields.vadovoEmail); valid = false; }
-  const dateVal = fields.data.value.trim();
-  if(dateVal && (!/^\d{4}-\d{2}-\d{2}$/.test(dateVal) || isNaN(new Date(dateVal).getTime()))){ markInvalid(fields.data); valid = false; }
   if(!valid){ showToast('Užpildykite privalomus laukus (*)', 'error'); return; }
 
   const vardas = fields.vardas.value.trim(), pavarde = fields.pavarde.value.trim();
@@ -356,14 +354,6 @@ function clearForm(){ ['f_vardas','f_pavarde','f_tabelio','f_pareigos','f_vadova
 function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); el('themeBtn').textContent = t==='dark'?'☀️':'🌙'; localStorage.setItem('ire-onboarding-theme', t); }
 function toggleTheme(){ const c = document.documentElement.getAttribute('data-theme')||'light'; applyTheme(c==='dark'?'light':'dark'); }
 applyTheme(localStorage.getItem('ire-onboarding-theme') || 'light');
-
-el('f_data').addEventListener('input', function(){
-  const v = this.value.replace(/\D/g,'').slice(0,8);
-  let out = v.slice(0,4);
-  if(v.length > 4) out += '-' + v.slice(4,6);
-  if(v.length > 6) out += '-' + v.slice(6,8);
-  this.value = out;
-});
 
 initAuth();
 </script>
