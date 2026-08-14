@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Naujas darbuotojas – HR registracija</title>
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/lt.js"></script>
 <style>
   :root{
     --bg:#eef0f2;--surface:#ffffff;--ink:#1a1c1f;
@@ -185,7 +188,7 @@
 
       <div class="field">
         <label>Darbo pradžia <span class="req">*</span><br><span class="lt">Start date</span></label>
-        <input type="date" id="f_data" lang="lt">
+        <input type="text" id="f_data" placeholder="yyyy-mm-dd" inputmode="numeric" maxlength="10" autocomplete="off">
       </div>
 
       <div class="form-footer">
@@ -315,6 +318,8 @@ async function submitForm(){
   for(const node of Object.values(fields)){ if(!node.value.trim()){ markInvalid(node); valid = false; } }
   const email = fields.vadovoEmail.value.trim();
   if(email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ markInvalid(fields.vadovoEmail); valid = false; }
+  const dateVal = fields.data.value.trim();
+  if(dateVal && (!/^\d{4}-\d{2}-\d{2}$/.test(dateVal) || isNaN(new Date(dateVal).getTime()))){ markInvalid(fields.data); valid = false; }
   if(!valid){ showToast('Užpildykite privalomus laukus (*)', 'error'); return; }
 
   const vardas = fields.vardas.value.trim(), pavarde = fields.pavarde.value.trim();
@@ -349,11 +354,33 @@ async function submitForm(){
 
 function showDone(){ el('formCard').style.display='none'; el('doneCard').classList.add('show'); window.scrollTo({top:0,behavior:'smooth'}); }
 function resetToForm(){ clearForm(); el('doneCard').classList.remove('show'); el('formCard').style.display=''; }
-function clearForm(){ ['f_vardas','f_pavarde','f_tabelio','f_pareigos','f_vadovas','f_vadovoEmail','f_data'].forEach(id=>{ const n=el(id); n.value=''; clearInvalid(n); }); }
+function clearForm(){ ['f_vardas','f_pavarde','f_tabelio','f_pareigos','f_vadovas','f_vadovoEmail','f_data'].forEach(id=>{ const n=el(id); n.value=''; clearInvalid(n); }); if(_fp) _fp.clear(); }
 
 function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); el('themeBtn').textContent = t==='dark'?'☀️':'🌙'; localStorage.setItem('ire-onboarding-theme', t); }
 function toggleTheme(){ const c = document.documentElement.getAttribute('data-theme')||'light'; applyTheme(c==='dark'?'light':'dark'); }
 applyTheme(localStorage.getItem('ire-onboarding-theme') || 'light');
+
+let _fp = null;
+(function initDatePicker(){
+  const input = el('f_data');
+  if(window.flatpickr){
+    _fp = flatpickr(input, {
+      dateFormat: 'Y-m-d',
+      allowInput: true,
+      disableMobile: true,   // naudoti flatpickr ir telefone (kad formatas visur vienodas)
+      locale: (flatpickr.l10ns && flatpickr.l10ns.lt) ? 'lt' : 'default'
+    });
+  } else {
+    // Atsarginis variantas, jei flatpickr neįsikrovė: rankinis yyyy-mm-dd formatavimas
+    input.addEventListener('input', function(){
+      const v = this.value.replace(/\D/g,'').slice(0,8);
+      let out = v.slice(0,4);
+      if(v.length > 4) out += '-' + v.slice(4,6);
+      if(v.length > 6) out += '-' + v.slice(6,8);
+      this.value = out;
+    });
+  }
+})();
 
 initAuth();
 </script>
