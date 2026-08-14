@@ -239,6 +239,12 @@
     <p>Ačiū. IT gavo poreikius ir paruoš viską iki darbuotojo darbo pradžios.</p>
   </div>
 
+  <div class="section done" id="alreadyCard">
+    <div class="ico" style="background:rgba(232,100,10,.12);color:#e8640a;">✓</div>
+    <h3>Užklausa jau pateikta</h3>
+    <p>Šio darbuotojo IT poreikiai jau pateikti IT komandai — pakartotinai pildyti nereikia.<br>Jei reikia ką nors pakeisti, kreipkitės į IT.</p>
+  </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -362,6 +368,12 @@ async function onReady(){
     if(!d){ el('loadingCard').classList.remove('show'); el('noticeCard').classList.add('show'); return; }
     RECORD_ID = d.ID ?? d.Id;
     const val = (title) => { const int = map[title.toLowerCase()] || title; return d[int] ?? ''; };
+    const busena = (val('Busena') || '').toString().trim();
+    if(busena && busena !== 'Laukiama vadovo'){
+      el('loadingCard').classList.remove('show');
+      el('alreadyCard').classList.add('show');
+      return;
+    }
     const fmtDate = (v) => v ? String(v).slice(0,10) : '—';
     el('s_vardas').textContent  = `${val('Vardas')} ${val('Pavarde')}`.trim() || (val('Title') || '—');
     el('s_pareigos').textContent = val('Pareigos') || '—';
@@ -408,6 +420,15 @@ async function submitForm(){
   const btn = el('submitBtn'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Siunčiama…';
   try{
     const token = await getSpToken();
+    // Dar kartą patikrinam būseną – jei tarpu tarpu jau pateikta (kitas skirtukas), neperrašom
+    const fresh = await getItemByToken(token, REC_TOKEN);
+    const fmap = await getFieldMap(token);
+    const busenaNow = fresh ? (fresh[fmap['busena']] || '').toString().trim() : '';
+    if(busenaNow && busenaNow !== 'Laukiama vadovo'){
+      el('summaryCard').style.display='none'; el('formCard').style.display='none';
+      el('alreadyCard').classList.add('show'); window.scrollTo({top:0,behavior:'smooth'});
+      return;
+    }
     await updateItem(token, RECORD_ID, fields);
     showDone();
   }catch(e){
