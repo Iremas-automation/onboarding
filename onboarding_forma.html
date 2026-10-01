@@ -205,6 +205,14 @@
       </div>
 
       <div class="field">
+        <label>SAP <span class="req">*</span><br><span class="lt">SAP prieiga</span></label>
+        <div class="seg" id="seg_sap">
+          <div class="seg-opt"><input type="radio" name="sap" id="sap_taip" value="Reikia"><label for="sap_taip">Reikia<span class="sub">Needed</span></label></div>
+          <div class="seg-opt"><input type="radio" name="sap" id="sap_ne" value="Nereikia"><label for="sap_ne">Nereikia<span class="sub">Not needed</span></label></div>
+        </div>
+      </div>
+
+      <div class="field">
         <label>Papildomos pašto dėžutės<br><span class="lt">Additional mailboxes</span></label>
         <div class="hint">Bendros dėžutės, prie kurių reikės prieigos. Palikite tuščią, jei nereikia.</div>
         <textarea id="f_dezutes" rows="2" placeholder="pvz. info@iremas.lt, invoice@iremas.lt"></textarea>
@@ -436,17 +444,20 @@ function markInvalid(n){ n.classList.add('invalid'); } function clearInvalid(n){
 function getTelefonas(){ const c = document.querySelector('[name=telefonas]:checked'); return c ? c.value : ''; }
 
 async function submitForm(){
-  const vieta = el('f_vieta'), seg = el('seg_tel');
-  clearInvalid(vieta); seg.classList.remove('invalid');
+  const vieta = el('f_vieta'), seg = el('seg_tel'), segSap = el('seg_sap');
+  clearInvalid(vieta); seg.classList.remove('invalid'); segSap.classList.remove('invalid');
   const telefonas = getTelefonas();
+  const sap = (document.querySelector('[name=sap]:checked') || {}).value || '';
   let valid = true;
   if(!vieta.value.trim()){ markInvalid(vieta); valid = false; }
   if(!telefonas){ seg.classList.add('invalid'); valid = false; }
+  if(!sap){ segSap.classList.add('invalid'); valid = false; }
   if(!valid){ showToast('Užpildykite privalomus laukus (*)', 'error'); return; }
 
   const fields = {
     DarboVieta:          vieta.value.trim(),
     MobilusTelefonas:    telefonas,
+    SAP:                 sap,
     PapildomosDezutes:   el('f_dezutes').value.trim(),
     PapildomaIranga:     el('f_iranga').value.trim(),
     SpecifinesProgramos: el('f_programos').value.trim(),
