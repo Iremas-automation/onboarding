@@ -1,0 +1,1307 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Darbuotojo anketa – UAB „Iremas“</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF0F2;--surface:#FFFFFF;--ink:#16212A;--muted:#566670;--line:#C6CFD6;--field:#F6F8F9;
+  --steel:#3B5061;--signal:#F2B705;--err:#B42318;--ok:#1E7448;--onink:#FFFFFF;
+  --cond:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11171C;--surface:#1A232A;--ink:#E4EAEE;--muted:#9AAAB4;--line:#34434E;--field:#141C22;
+    --steel:#AFC3D1;--err:#F28B7D;--ok:#62C493;--onink:#11171C;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11171C;--surface:#1A232A;--ink:#E4EAEE;--muted:#9AAAB4;--line:#34434E;--field:#141C22;
+  --steel:#AFC3D1;--err:#F28B7D;--ok:#62C493;--onink:#11171C;color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 150px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 var(--sans);-webkit-text-size-adjust:100%}
+
+/* Header + steps */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{max-width:860px;margin:0 auto;padding:14px 20px 8px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{margin:0;font:600 26px/1.1 var(--cond)}
+.brand .co{color:var(--muted);font-size:14px}
+.steps{max-width:860px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.step{appearance:none;background:none;border:0;border-top:4px solid var(--line);color:var(--muted);font:inherit;text-align:left;cursor:pointer;
+  display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;padding:10px 2px 12px;min-height:66px}
+.step .n{grid-row:1/3;font:600 34px/1 var(--cond)}
+.step .lbl{font-weight:600;font-size:16px;line-height:1.2;color:var(--ink)}
+.step .st{font-size:13px;line-height:1.3}
+.step[aria-selected="true"]{border-top-color:var(--signal);color:var(--ink)}
+.step.done{border-top-color:var(--steel)}
+.step.done .st{color:var(--ok)}
+.step.miss .st{color:var(--err)}
+.step:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+
+/* Layout */
+main{max-width:860px;margin:0 auto;padding:26px 20px 130px}
+.intro h2{margin:0 0 6px;font:600 30px/1.15 var(--cond)}
+.intro p{margin:0;color:var(--muted);max-width:62ch}
+.group{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 20px;margin-top:20px}
+.group>h3{margin:0 0 4px;font:600 21px/1.25 var(--cond)}
+.group>.sub{margin:0;color:var(--muted);font-size:15px}
+.group>:first-child{margin-top:0}
+
+/* Fields */
+.field{margin:20px 0 0;padding:0;border:0;min-width:0}
+.group>.field:first-child{margin-top:0}
+label,legend{display:block;font-weight:500;margin:0 0 6px;padding:0}
+.opt{color:var(--muted);font-weight:400;font-size:14px;margin-left:6px}
+input:not([type=radio]):not([type=checkbox]),textarea{
+  width:100%;min-height:54px;padding:12px 14px;font:inherit;font-size:18px;color:var(--ink);
+  background:var(--field);border:1.5px solid var(--line);border-radius:6px;-webkit-appearance:none;appearance:none}
+input[type=date]{min-height:54px}
+textarea{min-height:90px;resize:vertical;line-height:1.45}
+input:focus,textarea:focus{outline:3px solid var(--signal);outline-offset:1px;border-color:var(--ink)}
+.affix{display:flex}
+.affix .pre,.affix .suf{display:flex;align-items:center;padding:0 14px;background:var(--bg);border:1.5px solid var(--line);color:var(--muted);white-space:nowrap;font-weight:500}
+.affix .pre{border-right:0;border-radius:6px 0 0 6px}
+.affix .suf{border-left:0;border-radius:0 6px 6px 0}
+.affix input.r0l{border-radius:0 6px 6px 0}
+.affix input.r0r{border-radius:6px 0 0 6px}
+.mono{font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.hint{margin:6px 0 0;color:var(--muted);font-size:14px}
+.hint.good{color:var(--ok);font-weight:500}
+.msg{margin:6px 0 0;color:var(--err);font-size:15px;font-weight:500}
+.field.err input:not([type=radio]):not([type=checkbox]),.field.err textarea,.field.err .chips span,.field.err .pad{border-color:var(--err)}
+.field.err .chk-box{border-color:var(--err)}
+
+/* Choice chips */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chips label{position:relative;margin:0;font-weight:400}
+.chips input{position:absolute;inset:0;opacity:0;margin:0;pointer-events:none}
+.chips span{display:flex;align-items:center;min-height:54px;padding:10px 18px;border:1.5px solid var(--line);border-radius:6px;background:var(--field);font-weight:500;cursor:pointer;user-select:none;-webkit-user-select:none}
+.chips input:checked+span{background:var(--ink);border-color:var(--ink);color:var(--onink)}
+.chips input:focus-visible+span{outline:3px solid var(--signal);outline-offset:2px}
+
+/* Checkboxes */
+.chk label{display:flex;gap:14px;align-items:flex-start;font-weight:400;cursor:pointer;margin:0}
+.chk-box{appearance:none;-webkit-appearance:none;flex:none;width:32px;height:32px;margin:0;border:2px solid var(--steel);border-radius:5px;background:var(--field);display:grid;place-content:center;cursor:pointer}
+.chk-box:checked{background:var(--ink);border-color:var(--ink)}
+.chk-box:checked::after{content:"";width:9px;height:16px;border:solid var(--onink);border-width:0 3px 3px 0;transform:translateY(-2px) rotate(45deg)}
+.chk-box:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.chk .t{padding-top:3px}
+
+/* Repeaters */
+.rrow{border-top:1px solid var(--line);margin-top:20px;padding-top:16px}
+.rhead{display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.two .field{margin-top:12px}
+.inl{display:flex;gap:10px;align-items:center;margin:10px 0 0;font-weight:400;cursor:pointer;width:max-content;max-width:100%}
+.chk-box.sm{width:26px;height:26px}
+.chk-box.sm:checked::after{width:7px;height:13px}
+input:disabled{opacity:.45}
+.addrow{margin-top:18px}
+
+/* Docs checklist */
+.docrow{margin:0;padding:14px 0;border-bottom:1px solid var(--line)}
+.docrow:last-child{border-bottom:0}
+.need{display:inline-block;margin-left:8px;padding:1px 8px;border:1px solid var(--steel);border-radius:4px;color:var(--steel);font-size:13px;font-weight:600;vertical-align:2px}
+
+/* Signatures */
+.sighead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sighead label{margin:0}
+.pad{display:block;width:100%;height:190px;background:#FFFFFF;border:1.5px dashed var(--line);border-radius:6px;touch-action:none;cursor:crosshair;margin-top:6px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 24px;margin-top:16px;color:var(--muted);font-size:15px}
+.meta b{color:var(--ink);font-weight:600}
+
+/* Buttons */
+.btn{min-height:54px;padding:0 22px;border-radius:6px;font:600 17px var(--sans);cursor:pointer;border:1.5px solid var(--ink)}
+.btn.primary{background:var(--ink);color:var(--onink)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn:focus-visible,.link:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.link{background:none;border:0;color:var(--steel);font:600 16px var(--sans);text-decoration:underline;text-underline-offset:3px;padding:8px 4px;min-height:44px;cursor:pointer}
+
+/* Bottom bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px))}
+.bar .in{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:12px}
+#barMsg{flex:1;color:var(--err);font-size:15px;font-weight:500;line-height:1.3}
+
+/* Modal */
+.who{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:14px}
+.who b{color:var(--ink);font-weight:600}
+.who .link{font-size:14px;min-height:36px;padding:4px}
+.gate{position:fixed;inset:0;z-index:60;background:var(--bg);display:grid;place-items:center;padding:20px}
+.gate .sheet{width:min(460px,100%);border:1px solid var(--line)}
+.gate .btn{width:100%;margin-top:6px}
+.savebox{margin-top:16px;padding:14px 16px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface)}
+.savebox.ok{border-color:var(--ok)}
+.savebox.bad{border-color:var(--err)}
+.savebox p{margin:0}
+.savebox a{color:var(--steel);font-weight:600;word-break:break-all}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(8,12,16,.55);display:grid;place-items:center;padding:20px}
+.sheet{background:var(--surface);border-radius:8px;padding:24px;width:min(420px,100%)}
+.sheet h2{margin:0 0 8px;font:600 24px/1.2 var(--cond)}
+.sheet p{margin:0 0 14px;color:var(--muted)}
+#pinIn{font-size:30px;text-align:center;letter-spacing:.5em;-webkit-text-security:disc}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.sheet .actions{justify-content:flex-end}
+.demo{font-size:14px}
+
+/* Summary document */
+.donehead p{max-width:62ch}
+.msg.okmsg{color:var(--ok)}
+.docwrap{overflow-x:auto;margin-top:22px}
+.doc{background:#FFFFFF;color:#111;border:1px solid var(--line);padding:32px;font-size:14px;line-height:1.45;min-width:560px}
+.doc .dh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:6px}
+.doc h1{margin:0;font:600 22px/1.2 var(--cond)}
+.doc h2{margin:22px 0 6px;font:600 14px/1.3 var(--sans);letter-spacing:.03em}
+.doc table{width:100%;border-collapse:collapse}
+.doc td{border:1px solid #9AA4AB;padding:6px 8px;vertical-align:top}
+.doc td.l{width:40%;font-weight:600;background:#F1F4F6}
+.doc .stmt{margin:6px 0}
+.doc .sigs{display:flex;gap:28px;flex-wrap:wrap;margin-top:10px}
+.doc .sig{min-width:220px}
+.doc .sig img{display:block;height:70px;border-bottom:1px solid #111}
+.doc .sig span{font-size:12px;color:#444}
+
+@media (max-width:620px){
+  .two{grid-template-columns:1fr}
+  .step .lbl{font-size:14px}
+  .step .n{font-size:28px}
+  .brand h1{font-size:22px}
+  .bar .btn{padding:0 14px}
+}
+@media print{
+  :root{padding:0}
+  body{background:#fff}
+  .top,.bar,.donehead,.modal,.gate{display:none!important}
+  main{padding:0;max-width:none}
+  .docwrap{margin:0;overflow:visible}
+  .doc{border:0;padding:0;min-width:0}
+  .doc tr,.doc .sigs{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <h1>Darbuotojo anketa</h1>
+    <span class="who" id="who" hidden>Prisijungęs: <b id="whoName"></b><button type="button" class="link" id="logoutBtn">Atsijungti</button></span>
+    <span class="co" id="coLbl">UAB „Iremas“</span>
+  </div>
+  <nav class="steps" role="tablist" aria-label="Anketos dalys">
+    <button class="step" role="tab" data-page="hr"><span class="n">1</span><span class="lbl">Personalo skyrius</span><span class="st">Pildoma</span></button>
+    <button class="step" role="tab" data-page="emp"><span class="n">2</span><span class="lbl">Darbuotojas</span><span class="st">Laukia</span></button>
+    <button class="step" role="tab" data-page="tog"><span class="n">3</span><span class="lbl">Kartu</span><span class="st">Laukia</span></button>
+  </nav>
+</header>
+
+<main>
+<!-- ============ 1. HR ============ -->
+<section class="page" data-page="hr" id="page-hr">
+  <div class="intro">
+    <h2>Darbo sutarties duomenys</h2>
+    <p>Užpildykite prieš perduodami planšetę darbuotojui. Darbuotojas šios dalies nematys, o grįžti į ją galima tik su PIN kodu.</p>
+  </div>
+
+  <div class="group">
+    <div class="field"><label for="hr_name">Darbuotojo vardas, pavardė</label><input id="hr_name" data-req autocapitalize="words"></div>
+    <div class="field"><label for="hr_pos">Pareigos</label><input id="hr_pos" data-req></div>
+    <div class="field"><label for="hr_dept">Padalinys / skyrius</label><input id="hr_dept" data-req></div>
+    <div class="field"><label for="hr_start">Darbo pradžios data</label><input id="hr_start" type="date" data-req></div>
+  </div>
+
+  <div class="group">
+    <fieldset class="field"><legend>Sutarties terminas</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="hr_term" value="Neterminuota"><span>Neterminuota</span></label>
+        <label><input type="radio" name="hr_term" value="Terminuota"><span>Terminuota</span></label>
+      </div>
+    </fieldset>
+    <div data-show="hr_term=Terminuota">
+      <div class="field"><label for="hr_termend">Sutarties pabaigos data</label><input id="hr_termend" type="date" data-req data-type="enddate">
+        <label class="inl"><input type="checkbox" class="chk-box sm" id="hr_termend_ind" data-indef="hr_termend"><span>Pabaiga susieta su įvykiu, ne data</span></label></div>
+      <div class="field"><label for="hr_termwhy">Terminuotos sutarties aplinkybės</label><textarea id="hr_termwhy" rows="2" data-req placeholder="pvz. laikinai nesančio darbuotojo pavadavimas"></textarea></div>
+    </div>
+
+    <fieldset class="field"><legend>Darbo laikas (etato dydis)</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="hr_fte" value="1,0"><span>Pilnas etatas</span></label>
+        <label><input type="radio" name="hr_fte" value="0,75"><span>0,75</span></label>
+        <label><input type="radio" name="hr_fte" value="0,5"><span>0,5</span></label>
+        <label><input type="radio" name="hr_fte" value="Kita"><span>Kitas</span></label>
+      </div>
+    </fieldset>
+    <div class="field" data-show="hr_fte=Kita"><label for="hr_fte_o">Etato dalis</label><input id="hr_fte_o" inputmode="decimal" data-req data-type="fte" placeholder="pvz. 0,6"></div>
+
+    <fieldset class="field"><legend>Ši darbovietė</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="hr_main" value="Pagrindinė"><span>Pagrindinė</span></label>
+        <label><input type="radio" name="hr_main" value="Nepagrindinė"><span>Nepagrindinė</span></label>
+      </div>
+    </fieldset>
+  </div>
+
+  <div class="group">
+    <h3>Darbo užmokestis</h3>
+    <p class="sub">Sumos eurais per mėnesį, neatskaičius mokesčių.</p>
+    <fieldset class="field"><legend>Bandomasis laikotarpis</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="hr_prob" value="Taikomas"><span>Taikomas</span></label>
+        <label><input type="radio" name="hr_prob" value="Netaikomas"><span>Netaikomas</span></label>
+      </div>
+    </fieldset>
+    <div class="field" data-show="hr_prob=Taikomas"><label for="hr_sal1">Darbo užmokestis bandomuoju laikotarpiu</label>
+      <div class="affix"><input id="hr_sal1" class="r0r mono" inputmode="decimal" data-req data-type="money"><span class="suf">Eur/mėn.</span></div></div>
+    <div class="field"><label for="hr_sal2" id="lbl_sal2">Darbo užmokestis po bandomojo laikotarpio</label>
+      <div class="affix"><input id="hr_sal2" class="r0r mono" inputmode="decimal" data-req data-type="money"><span class="suf">Eur/mėn.</span></div></div>
+  </div>
+
+  <div class="group">
+    <div class="field"><label for="hr_notes">Papildomos sąlygos, susitarimai ir komentarai<span class="opt">neprivaloma</span></label><textarea id="hr_notes" rows="3"></textarea></div>
+  </div>
+</section>
+
+<!-- ============ 2. EMPLOYEE ============ -->
+<section class="page" data-page="emp" id="page-emp" hidden>
+  <div class="intro">
+    <h2>Jūsų duomenys</h2>
+    <p>Užpildykite visus laukus. Duomenys naudojami tik darbo santykiams ir darbo užmokesčiui apskaičiuoti. Baigę grąžinkite planšetę Personalo skyriaus darbuotojui.</p>
+  </div>
+
+  <div class="group">
+    <h3>Asmeninė informacija</h3>
+    <div class="field"><label for="emp_name">Vardas, pavardė</label><input id="emp_name" data-req autocapitalize="words"></div>
+    <div class="field"><label for="emp_addr">Gyvenamoji vieta</label><input id="emp_addr" data-req placeholder="Gatvė, namo nr., miestas"></div>
+    <div class="field"><label for="emp_phone">Telefono numeris</label>
+      <div class="affix"><span class="pre">+370</span><input id="emp_phone" class="r0l mono" inputmode="numeric" data-req data-type="phone" placeholder="6xx xxxxx"></div></div>
+    <div class="field"><label for="emp_email">El. paštas</label><input id="emp_email" type="email" inputmode="email" autocapitalize="off" data-req data-type="email"></div>
+    <div class="field"><label for="emp_ice">Kontaktinis telefono numeris nelaimės atveju</label>
+      <div class="affix"><span class="pre">+370</span><input id="emp_ice" class="r0l mono" inputmode="numeric" data-req data-type="phone" placeholder="6xx xxxxx"></div></div>
+    <div class="field"><label for="emp_ak">Asmens kodas</label><input id="emp_ak" class="mono" inputmode="numeric" data-req data-type="ak" maxlength="11"><p class="hint" id="ak_hint"></p></div>
+  </div>
+
+  <div class="group">
+    <h3>Išsilavinimas</h3>
+    <fieldset class="field"><legend>Įgytas išsilavinimas</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="emp_edu" value="pagrindinis"><span>Pagrindinis</span></label>
+        <label><input type="radio" name="emp_edu" value="vidurinis"><span>Vidurinis</span></label>
+        <label><input type="radio" name="emp_edu" value="profesinis"><span>Profesinis</span></label>
+        <label><input type="radio" name="emp_edu" value="aukštesnysis"><span>Aukštesnysis</span></label>
+        <label><input type="radio" name="emp_edu" value="aukštasis neuniversitetinis"><span>Aukštasis neuniversitetinis</span></label>
+        <label><input type="radio" name="emp_edu" value="aukštasis universitetinis"><span>Aukštasis universitetinis</span></label>
+        <label><input type="radio" name="emp_edu" value="nebaigtas aukštasis"><span>Nebaigtas aukštasis</span></label>
+      </div>
+    </fieldset>
+    <div id="eduList"></div>
+    <button type="button" class="btn ghost addrow" id="addEdu">Pridėti mokslo įstaigą</button>
+  </div>
+
+  <div class="group">
+    <h3>Atostogų norma ir papildomos poilsio dienos</h3>
+    <fieldset class="field"><legend>Ar turite vaikų ar globotinių iki 14 metų?</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="emp_haskids" value="Taip"><span>Taip</span></label>
+        <label><input type="radio" name="emp_haskids" value="Ne"><span>Ne</span></label>
+      </div>
+    </fieldset>
+    <div data-show="emp_haskids=Taip">
+      <div id="kidList"></div>
+      <button type="button" class="btn ghost addrow" id="addKid">Pridėti vaiką</button>
+
+      <fieldset class="field"><legend>Vienas (-a) auginu vaiką (-us) iki 14 metų</legend>
+        <div class="chips" data-req-radio>
+          <label><input type="radio" name="emp_single" value="Taip"><span>Taip</span></label>
+          <label><input type="radio" name="emp_single" value="Ne"><span>Ne</span></label>
+        </div>
+      </fieldset>
+      <div data-show="emp_single=Taip">
+        <div class="field"><label for="emp_single_doc">Patvirtinantis dokumentas ir jo numeris</label><input id="emp_single_doc" data-req></div>
+        <div class="field"><label for="emp_single_to">Galiojimo data</label><input id="emp_single_to" type="date" data-req data-type="validto">
+          <label class="inl"><input type="checkbox" class="chk-box sm" id="emp_single_to_ind" data-indef="emp_single_to"><span>Galioja neterminuotai</span></label></div>
+      </div>
+    </div>
+
+    <fieldset class="field"><legend>Vaikas ar globotinis turi negalią</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="emp_kiddis" value="Taip"><span>Taip</span></label>
+        <label><input type="radio" name="emp_kiddis" value="Ne"><span>Ne</span></label>
+      </div>
+    </fieldset>
+    <div data-show="emp_kiddis=Taip">
+      <div class="two">
+        <div class="field"><label for="emp_kiddis_dob">Vaiko gimimo data</label><input id="emp_kiddis_dob" type="date" data-req data-type="kid18"></div>
+        <div class="field"><label for="emp_kiddis_no">Pažymėjimo numeris</label><input id="emp_kiddis_no" data-req></div>
+      </div>
+      <div class="field"><label for="emp_kiddis_to">Pažymėjimo galiojimo data</label><input id="emp_kiddis_to" type="date" data-req data-type="validto">
+        <label class="inl"><input type="checkbox" class="chk-box sm" id="emp_kiddis_to_ind" data-indef="emp_kiddis_to"><span>Galioja neterminuotai</span></label></div>
+    </div>
+
+    <fieldset class="field"><legend>Man nustatytas neįgalumas</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="emp_mydis" value="Taip"><span>Taip</span></label>
+        <label><input type="radio" name="emp_mydis" value="Ne"><span>Ne</span></label>
+      </div>
+    </fieldset>
+    <div data-show="emp_mydis=Taip">
+      <div class="two">
+        <div class="field"><label for="emp_mydis_lvl">Dalyvumo lygis</label><input id="emp_mydis_lvl" data-req placeholder="pvz. 40 %"></div>
+        <div class="field"><label for="emp_mydis_no">Pažymėjimo numeris</label><input id="emp_mydis_no" data-req></div>
+        <div class="field"><label for="emp_mydis_from">Išdavimo data</label><input id="emp_mydis_from" type="date" data-req data-type="pastdate"></div>
+        <div class="field"><label for="emp_mydis_to">Galiojimo data</label><input id="emp_mydis_to" type="date" data-req data-type="validto">
+          <label class="inl"><input type="checkbox" class="chk-box sm" id="emp_mydis_to_ind" data-indef="emp_mydis_to"><span>Galioja neterminuotai</span></label></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group">
+    <h3>Darbo užmokesčio mokėjimas</h3>
+    <fieldset class="field"><legend>Neapmokestinamasis pajamų dydis (NPD)</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="emp_npd" value="Taikyti"><span>Taikyti</span></label>
+        <label><input type="radio" name="emp_npd" value="Netaikyti"><span>Netaikyti</span></label>
+        <label><input type="radio" name="emp_npd" value="Specialus NPD (30–55 % darbingumo lygis)"><span>Specialus NPD (30–55 % darbingumo lygis)</span></label>
+      </div>
+      <p class="hint">NPD gali būti taikomas tik vienoje darbovietėje.</p>
+    </fieldset>
+    <div class="field"><label for="emp_iban">Banko sąskaitos numeris</label>
+      <input id="emp_iban" class="mono" inputmode="numeric" data-req data-type="iban" placeholder="LT00 0000 0000 0000 0000"></div>
+    <fieldset class="field"><legend>Darbo užmokestį prašau mokėti</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="emp_pay" value="Vieną kartą per mėnesį"><span>Vieną kartą per mėnesį</span></label>
+        <label><input type="radio" name="emp_pay" value="Du kartus per mėnesį"><span>Du kartus per mėnesį</span></label>
+      </div>
+    </fieldset>
+    <div class="field" data-show="emp_pay=Du kartus per mėnesį"><label for="emp_adv">Avanso suma</label>
+      <div class="affix"><input id="emp_adv" class="r0r mono" inputmode="decimal" data-req data-type="money"><span class="suf">Eur</span></div></div>
+  </div>
+
+  <div class="group">
+    <h3>Darbuotojo patvirtinimas</h3>
+    <div class="field chk"><label><input type="checkbox" class="chk-box" id="emp_c1" data-req-check>
+      <span class="t">Aš, <b id="declName">________</b>, patvirtinu, kad laisva valia pateikiu šiuos duomenis, suprantu anketos klausimus, o pateikti atsakymai yra išsamūs ir teisingi.</span></label></div>
+    <div class="field chk"><label><input type="checkbox" class="chk-box" id="emp_c2" data-req-check>
+      <span class="t">Suprantu pareigą laiku pranešti Personalo skyriui apie anketoje pateiktų duomenų pasikeitimus ir kitas aplinkybes, galinčias reikšmingai paveikti darbo sutarties sudarymą, vykdymą ar nutraukimą (LR darbo kodekso 25 straipsnio 1 dalis). Suprantu, kad už nepranešimą atsakomybė tenka man.</span></label></div>
+    <div class="field">
+      <div class="sighead"><label for="sig_emp">Parašas</label><button type="button" class="link" data-clear="sig_emp">Išvalyti</button></div>
+      <canvas id="sig_emp" class="pad" data-sig aria-label="Parašo laukas"></canvas>
+      <p class="hint">Pasirašykite pirštu arba stilusu.</p>
+    </div>
+    <div class="meta"><span>Užpildymo data: <b class="today"></b></span></div>
+  </div>
+</section>
+
+<!-- ============ 3. TOGETHER ============ -->
+<section class="page" data-page="tog" id="page-tog" hidden>
+  <div class="intro">
+    <h2>Dokumentų patikrinimas</h2>
+    <p>Pildoma kartu su Personalo skyriaus darbuotoju. Pažymėkite, kuriuos dokumentus darbuotojas pateikė duomenų tikrumui patvirtinti.</p>
+  </div>
+
+  <div class="group">
+    <h3 id="togName">Darbuotojas</h3>
+    <p class="sub">Žyma „Reikalingas“ rodo dokumentus, kurių reikia pagal anketos atsakymus.</p>
+    <div id="docList"></div>
+  </div>
+
+  <div class="group">
+    <div class="field"><label for="tog_date">Dokumentų pateikimo data</label><input id="tog_date" type="date" data-req></div>
+    <div class="field"><label for="tog_hr">Personalo skyriaus darbuotojo vardas, pavardė</label><input id="tog_hr" data-req autocapitalize="words"></div>
+  </div>
+
+  <div class="group">
+    <div class="field">
+      <div class="sighead"><label for="sig_emp2">Darbuotojo parašas</label><button type="button" class="link" data-clear="sig_emp2">Išvalyti</button></div>
+      <canvas id="sig_emp2" class="pad" data-sig aria-label="Darbuotojo parašo laukas"></canvas>
+    </div>
+    <div class="field">
+      <div class="sighead"><label for="sig_hr">Personalo skyriaus darbuotojo parašas</label><button type="button" class="link" data-clear="sig_hr">Išvalyti</button></div>
+      <canvas id="sig_hr" class="pad" data-sig aria-label="Personalo skyriaus darbuotojo parašo laukas"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DONE ============ -->
+<section class="page" data-page="done" id="page-done" hidden>
+  <div class="donehead intro">
+    <h2>Anketa užpildyta</h2>
+    <p>Anketa išsaugoma PDF formatu Personalo skyriaus SharePoint bibliotekoje. Planšetėje failas nelieka.</p>
+    <div class="savebox" id="saveBox" role="status" aria-live="polite"><p id="saveTxt">Ruošiamas PDF…</p></div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="retryBtn" hidden>Bandyti išsaugoti dar kartą</button>
+      <button type="button" class="btn ghost" id="pdfBtn">Atsisiųsti PDF kopiją</button>
+      <button type="button" class="btn ghost" id="editBtn">Taisyti</button>
+      <button type="button" class="btn ghost" id="newBtn">Nauja anketa</button>
+    </div>
+    <p class="msg" id="doneMsg" role="status" aria-live="polite" hidden></p>
+  </div>
+  <div class="docwrap"><article class="doc" id="doc"></article></div>
+</section>
+</main>
+
+<footer class="bar" id="bar">
+  <div class="in">
+    <button type="button" class="btn ghost" id="backBtn">Atgal</button>
+    <span id="barMsg" role="status" aria-live="polite"></span>
+    <button type="button" class="btn primary" id="nextBtn">Perduoti darbuotojui</button>
+  </div>
+</footer>
+
+<div class="gate" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="gateT">
+  <div class="sheet">
+    <h2 id="gateT">Prisijunkite</h2>
+    <p>Prisijunkite su savo Iremas Microsoft paskyra. Užpildyta anketa bus išsaugota Personalo skyriaus SharePoint bibliotekoje.</p>
+    <button type="button" class="btn primary" id="loginBtn">Prisijungti su Microsoft</button>
+    <p class="msg" id="gateMsg" hidden></p>
+    <button type="button" class="link" id="demoBtn" hidden>Tęsti be prisijungimo (tik PDF atsisiuntimas)</button>
+  </div>
+</div>
+
+<div class="modal" id="pinModal" hidden role="dialog" aria-modal="true" aria-labelledby="pinT">
+  <div class="sheet">
+    <h2 id="pinT">Personalo skyriaus patvirtinimas</h2>
+    <p>Šioje dalyje matomi darbo sutarties ir darbo užmokesčio duomenys. Įveskite PIN kodą.</p>
+    <input id="pinIn" inputmode="numeric" maxlength="6" aria-label="PIN kodas">
+    <p class="msg" id="pinMsg" hidden></p>
+    <p class="hint demo">Prototipe PIN kodas: 1234</p>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="pinCancel">Atšaukti</button>
+      <button type="button" class="btn primary" id="pinOk">Patvirtinti</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.1/lib/msal-browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.10/build/pdfmake.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.10/build/vfs_fonts.js"></script>
+<script>
+(function(){
+/* ================== KONFIGŪRACIJA ==================
+   Prisijungimas kaip TKS / PCPLS formose: SharePoint REST (_api) su
+   SharePoint teisėmis AllSites.Write — Graph admino patvirtinimo nereikia. */
+const CFG = {
+  clientId:   '31c9fa0a-b8a4-47ea-8eda-ebb3b5d8cd3c',            // Iremas Onboarding app registration
+  tenantId:   'f300c84f-87f0-4d9e-8284-1e36dbe06fbe',            // Achemos grupė
+  siteUrl:    'https://achemosgrupelt.sharepoint.com/sites/IremasOnboarding', // PAKEISK, jei HR biblioteka kitoje svetainėje
+  library:    'Darbuotoju anketos',                               // bibliotekos pavadinimas (kaip matomas SharePoint)
+  yearFolder: true                                                // dėti į poaplankį pagal metus (2026, 2027 …)
+};
+const SP_HOST = new URL(CFG.siteUrl).origin;
+const SP_SCOPES = [SP_HOST + '/AllSites.Write'];
+const LOGIN_SCOPES = ['User.Read'].concat(SP_SCOPES);
+/* ==================================================== */
+const $ = id => document.getElementById(id);
+const qa = (s, r=document) => Array.from(r.querySelectorAll(s));
+const pad2 = n => String(n).padStart(2,'0');
+const now = new Date();
+const TODAY = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const radio = n => { const c = document.querySelector(`input[name="${n}"]:checked`); return c ? c.value : ''; };
+const val = id => { const e = $(id); return e ? e.value.trim() : ''; };
+
+const ORDER = ['hr','emp','tog'];
+const NAMES = {hr:'Personalo skyrius', emp:'Darbuotojas', tog:'Kartu'};
+const PIN = '1234';
+let cur = 'hr', locked = false;
+const visited = new Set(['hr']);
+
+/* ---------- docs checklist ---------- */
+const DOCS = [
+  ['doc_id','Asmens tapatybės kortelė arba pasas'],
+  ['doc_kids','Vaiko (-ų) gimimo liudijimas (-ai)'],
+  ['doc_single','Dokumentas, patvirtinantis, kad darbuotojas vienas augina vaiką iki 14 metų arba vaiką su negalia iki 18 metų'],
+  ['doc_dis','Neįgalumą patvirtinantys dokumentai'],
+  ['doc_edu','Išsilavinimo dokumentas (-ai)'],
+  ['doc_courses','Kursų ir mokymų pažymėjimai, sertifikatai, licencijos']
+];
+$('docList').innerHTML = DOCS.map(([id,t]) =>
+  `<div class="field chk docrow"><label><input type="checkbox" class="chk-box" id="${id}" data-need="0"><span class="t">${t}<span class="need" hidden>Reikalingas</span></span></label></div>`
+).join('');
+
+function updateNeeds(){
+  const need = {
+    doc_id: true,
+    doc_kids: radio('emp_haskids') === 'Taip',
+    doc_single: radio('emp_haskids') === 'Taip' && radio('emp_single') === 'Taip',
+    doc_dis: radio('emp_mydis') === 'Taip' || radio('emp_kiddis') === 'Taip',
+    doc_edu: true,
+    doc_courses: false
+  };
+  DOCS.forEach(([id]) => {
+    const el = $(id);
+    el.dataset.need = need[id] ? '1' : '0';
+    el.closest('label').querySelector('.need').hidden = !need[id];
+    if (!need[id]) setErr(el, '');
+  });
+}
+
+/* ---------- repeaters ---------- */
+let uid = 0;
+function addEdu(){
+  const i = ++uid, row = document.createElement('div');
+  row.className = 'rrow';
+  row.innerHTML = `<div class="rhead"><span class="rt"></span><button type="button" class="link rm">Pašalinti</button></div>
+    <div class="field"><label for="ei${i}">Mokslo įstaigos pavadinimas</label><input id="ei${i}" data-k="inst" data-req></div>
+    <div class="two">
+      <div class="field"><label for="es${i}">Specialybė, kvalifikacija</label><input id="es${i}" data-k="spec" data-req></div>
+      <div class="field"><label for="ed${i}">Dokumento išdavimo data</label><input id="ed${i}" type="date" max="${TODAY}" data-k="issued" data-req data-type="pastdate"></div>
+    </div>`;
+  $('eduList').appendChild(row); renumber('eduList','Mokslo įstaiga'); prep(row);
+}
+function addKid(){
+  const i = ++uid, row = document.createElement('div');
+  row.className = 'rrow';
+  row.innerHTML = `<div class="rhead"><span class="rt"></span><button type="button" class="link rm">Pašalinti</button></div>
+    <div class="two">
+      <div class="field"><label for="kn${i}">Vardas</label><input id="kn${i}" data-k="name" data-req autocapitalize="words"></div>
+      <div class="field"><label for="kd${i}">Gimimo data</label><input id="kd${i}" type="date" max="${TODAY}" data-k="dob" data-req data-type="kiddob"></div>
+    </div>`;
+  $('kidList').appendChild(row); renumber('kidList','Vaikas'); prep(row);
+}
+function renumber(listId, word){
+  const rows = qa('.rrow', $(listId));
+  rows.forEach((r,i) => {
+    r.querySelector('.rt').textContent = rows.length > 1 ? `${word} ${i+1}` : word;
+    r.querySelector('.rm').hidden = rows.length === 1;
+  });
+}
+document.addEventListener('click', e => {
+  const rm = e.target.closest('.rm'); if (!rm) return;
+  const list = rm.closest('#eduList, #kidList');
+  rm.closest('.rrow').remove();
+  renumber(list.id, list.id === 'eduList' ? 'Mokslo įstaiga' : 'Vaikas');
+  refresh();
+});
+$('addEdu').onclick = () => { addEdu(); qa('#eduList .rrow').pop().querySelector('input').focus(); };
+$('addKid').onclick = () => { addKid(); qa('#kidList .rrow').pop().querySelector('input').focus(); };
+
+/* ---------- conditional fields ---------- */
+function applyShow(){
+  qa('[data-show]').forEach(el => {
+    const [n,v] = el.dataset.show.split('=');
+    el.hidden = radio(n) !== v;
+  });
+  $('lbl_sal2').textContent = radio('hr_prob') === 'Netaikomas' ? 'Darbo užmokestis' : 'Darbo užmokestis po bandomojo laikotarpio';
+}
+function isShown(el){
+  for (let p = el; p; p = p.parentElement) if (p.hasAttribute && p.hasAttribute('data-show') && p.hidden) return false;
+  return true;
+}
+
+/* ---------- validators ---------- */
+function akInfo(v){
+  const s = v.replace(/\D/g,'');
+  if (s.length !== 11) return {err:'Asmens kodą sudaro 11 skaitmenų'};
+  const d = [...s].map(Number);
+  let r = [1,2,3,4,5,6,7,8,9,1].reduce((a,w,i) => a + w*d[i], 0) % 11;
+  if (r === 10){ r = [3,4,5,6,7,8,9,1,2,3].reduce((a,w,i) => a + w*d[i], 0) % 11; if (r === 10) r = 0; }
+  if (r !== d[10]) return {err:'Asmens kodas neteisingas, patikrinkite skaitmenis'};
+  if (d[0] === 9) return {ok:true};
+  if (d[0] < 1 || d[0] > 6) return {err:'Asmens kodas turi prasidėti skaitmeniu nuo 1 iki 6'};
+  const y = {1:1800,2:1800,3:1900,4:1900,5:2000,6:2000}[d[0]] + +s.slice(1,3), m = +s.slice(3,5), dd = +s.slice(5,7);
+  const dt = new Date(y, m-1, dd);
+  if (dt.getFullYear() !== y || dt.getMonth() !== m-1 || dt.getDate() !== dd) return {err:'Asmens kode nurodyta neteisinga gimimo data'};
+  return {ok:true, dob:`${y}-${pad2(m)}-${pad2(dd)}`};
+}
+function ibanErr(v){
+  const d = v.replace(/\D/g,'');
+  if (d.length !== 18) return 'Sąskaitos numerį sudaro LT ir 18 skaitmenų';
+  let m = 0;
+  for (const ch of d.slice(2) + '2129' + d.slice(0,2)) m = (m*10 + +ch) % 97;
+  return m === 1 ? '' : 'Sąskaitos numeris neteisingas, patikrinkite skaitmenis';
+}
+function kidErr(v){
+  const b = new Date(v + 'T00:00:00');
+  if (isNaN(b)) return 'Nurodykite gimimo datą';
+  if (v > TODAY) return 'Data negali būti ateityje';
+  const c = new Date(b); c.setFullYear(c.getFullYear() + 14);
+  return c <= new Date(TODAY + 'T00:00:00') ? 'Nurodykite tik vaikus iki 14 metų' : '';
+}
+const num = v => parseFloat(v.replace(/\s/g,'').replace(',','.'));
+
+function dateErr(t, v){
+  const d = new Date(v + 'T00:00:00');
+  if (isNaN(d)) return 'Pasirinkite datą';
+  if (t === 'pastdate') return v > TODAY ? 'Data negali būti ateityje' : '';
+  if (t === 'validto') return v < TODAY ? 'Dokumentas nebegalioja, patikrinkite datą' : '';
+  if (t === 'enddate'){
+    const st = val('hr_start');
+    return st && v <= st ? 'Pabaigos data turi būti vėlesnė už darbo pradžios datą' : '';
+  }
+  if (t === 'kid18'){
+    if (v > TODAY) return 'Data negali būti ateityje';
+    const c = new Date(d); c.setFullYear(c.getFullYear() + 18);
+    return c <= new Date(TODAY + 'T00:00:00') ? 'Nurodykite vaiką iki 18 metų' : '';
+  }
+  return '';
+}
+function validateEl(el){
+  if (!isShown(el)) return '';
+  if (el.disabled) return '';
+  if (el.hasAttribute('data-sig')) return pads[el.id].empty ? 'Reikalingas parašas' : '';
+  if (el.hasAttribute('data-req-radio')) return el.querySelector('input:checked') ? '' : 'Pasirinkite vieną variantą';
+  if (el.type === 'checkbox'){
+    if (el.checked) return '';
+    if (el.hasAttribute('data-req-check')) return 'Pažymėkite, kad patvirtinate';
+    if (el.dataset.need === '1') return 'Šis dokumentas reikalingas pagal anketos atsakymus';
+    return '';
+  }
+  const v = el.value.trim();
+  if (!v) return el.hasAttribute('data-req') ? 'Privalomas laukas' : '';
+  switch (el.dataset.type){
+    case 'phone': return v.replace(/\D/g,'').length === 8 ? '' : 'Įveskite 8 skaitmenis po +370';
+    case 'email': return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? '' : 'Patikrinkite el. pašto adresą';
+    case 'ak': return akInfo(v).err || '';
+    case 'iban': return ibanErr(v);
+    case 'money': return num(v) > 0 ? '' : 'Įveskite sumą eurais';
+    case 'fte': { const n = num(v); return n > 0 && n <= 1 ? '' : 'Įveskite etato dalį nuo 0,05 iki 1'; }
+    case 'kiddob': return kidErr(v);
+    case 'pastdate': case 'validto': case 'enddate': case 'kid18': return dateErr(el.dataset.type, v);
+  }
+  return '';
+}
+function setErr(el, msg){
+  const w = el.closest('.field'); if (!w) return;
+  let m = w.querySelector(':scope > .msg');
+  if (msg){
+    if (!m){ m = document.createElement('p'); m.className = 'msg'; w.appendChild(m); }
+    m.textContent = msg; w.classList.add('err'); el.setAttribute('aria-invalid','true');
+  } else {
+    w.classList.remove('err'); if (m) m.remove(); el.removeAttribute('aria-invalid');
+  }
+}
+const SEL = '[data-req],[data-type],[data-req-radio],[data-req-check],[data-sig],[data-need]';
+function validatePage(p, mark){
+  const errs = [];
+  qa(SEL, document.querySelector(`.page[data-page="${p}"]`)).forEach(el => {
+    const m = validateEl(el);
+    if (mark) setErr(el, m);
+    if (m) errs.push(el);
+  });
+  return errs;
+}
+function focusFirst(el){
+  el.scrollIntoView({block:'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+  const f = el.matches('input,textarea') ? el : el.querySelector('input');
+  if (f && f.type !== 'checkbox') setTimeout(() => f.focus({preventScroll:true}), 300);
+}
+
+/* ---------- input formatting + live validation ---------- */
+function prep(root){
+  qa('input,textarea', root).forEach(e => {
+    e.setAttribute('autocomplete','off'); e.setAttribute('autocorrect','off'); e.spellcheck = false;
+  });
+}
+function fmt(el){
+  const t = el.dataset.type;
+  if (t === 'phone'){
+    let d = el.value.replace(/\D/g,'');
+    if (d.length > 8 && d.startsWith('370')) d = d.slice(3);
+    if (d.length === 9 && d.startsWith('8')) d = d.slice(1);
+    d = d.slice(0,8);
+    el.value = d.length > 3 ? d.slice(0,3) + ' ' + d.slice(3) : d;
+  } else if (t === 'ak'){
+    el.value = el.value.replace(/\D/g,'').slice(0,11);
+    const info = akInfo(el.value), h = $('ak_hint');
+    h.textContent = info.dob ? `Gimimo data: ${info.dob}` : (info.ok ? 'Asmens kodas tinkamas' : '');
+    h.className = 'hint' + (info.ok ? ' good' : '');
+  } else if (t === 'iban'){
+    const d = el.value.replace(/^LT/i,'').replace(/\D/g,'').slice(0,18);
+    el.value = d.length ? ('LT' + d).replace(/(.{4})(?=.)/g,'$1 ') : '';
+  } else if (t === 'money' || t === 'fte'){
+    el.value = el.value.replace(/[^\d.,\s]/g,'');
+  }
+}
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset && el.dataset.type) fmt(el);
+  if (el.id === 'emp_name') $('declName').textContent = el.value.trim() || '________';
+  const w = el.closest('.field');
+  if (w && w.classList.contains('err') && el.matches(SEL)) setErr(el, validateEl(el));
+  refresh();
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.type === 'radio'){
+    applyShow();
+    const g = el.closest('[data-req-radio]');
+    if (g) setErr(g, '');
+    if (el.name === 'emp_haskids' && el.value === 'Taip' && !qa('#kidList .rrow').length) addKid();
+  }
+  if (el.dataset.indef){
+    const t = $(el.dataset.indef);
+    t.disabled = el.checked;
+    if (el.checked) t.value = '';
+    setErr(t, '');
+  } else if (el.type === 'checkbox') setErr(el, validateEl(el));
+  if (el.id === 'hr_start' && $('hr_termend').value) setErr($('hr_termend'), validateEl($('hr_termend')));
+  refresh();
+});
+document.addEventListener('focusout', e => {
+  const el = e.target;
+  if (el.dataset && el.dataset.type && el.value.trim()) setErr(el, validateEl(el));
+});
+
+/* ---------- signature pads ---------- */
+const INK = '#14304F';
+class Pad {
+  constructor(c){
+    this.c = c; this.ctx = c.getContext('2d'); this.empty = true; this.w = 0; this.drawing = false;
+    c.addEventListener('pointerdown', e => {
+      e.preventDefault(); c.setPointerCapture(e.pointerId);
+      this.drawing = true; this.last = this.pt(e); this.dot(this.last);
+    });
+    c.addEventListener('pointermove', e => {
+      if (!this.drawing) return;
+      const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+      for (const ev of evs){ const p = this.pt(ev); this.line(this.last, p); this.last = p; }
+    });
+    const end = () => { if (this.drawing){ this.drawing = false; sigChanged(this); } };
+    c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end);
+  }
+  pt(e){ const r = this.c.getBoundingClientRect(); return {x:e.clientX - r.left, y:e.clientY - r.top}; }
+  fit(){
+    const r = this.c.getBoundingClientRect();
+    if (!r.width || r.width === this.w) return;
+    const data = this.empty ? null : this.c.toDataURL();
+    const dpr = window.devicePixelRatio || 1;
+    this.c.width = Math.round(r.width * dpr); this.c.height = Math.round(r.height * dpr);
+    this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    this.w = r.width; this.h = r.height;
+    this.ctx.lineWidth = 2.4; this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round';
+    this.ctx.strokeStyle = INK; this.ctx.fillStyle = INK;
+    if (data){ const img = new Image(); img.onload = () => this.ctx.drawImage(img, 0, 0, r.width, r.height); img.src = data; }
+  }
+  dot(p){ this.ctx.beginPath(); this.ctx.arc(p.x, p.y, 1.3, 0, Math.PI*2); this.ctx.fill(); this.empty = false; }
+  line(a,b){ this.ctx.beginPath(); this.ctx.moveTo(a.x,a.y); this.ctx.lineTo(b.x,b.y); this.ctx.stroke(); this.empty = false; }
+  clear(){ this.ctx.clearRect(0, 0, this.w || 9999, this.h || 9999); this.empty = true; sigChanged(this); }
+  png(){ return this.c.toDataURL('image/png'); }
+}
+const pads = {};
+qa('canvas[data-sig]').forEach(c => pads[c.id] = new Pad(c));
+function sigChanged(p){
+  const w = p.c.closest('.field');
+  if (w.classList.contains('err')) setErr(p.c, validateEl(p.c));
+  refresh();
+}
+qa('[data-clear]').forEach(b => b.onclick = () => pads[b.dataset.clear].clear());
+function fitPads(){ Object.values(pads).forEach(p => p.fit()); }
+window.addEventListener('resize', fitPads);
+
+/* ---------- navigation ---------- */
+function refresh(){
+  updateNeeds();
+  ORDER.forEach(p => {
+    const b = document.querySelector(`.step[data-page="${p}"]`);
+    const n = validatePage(p, false).length, seen = visited.has(p);
+    b.setAttribute('aria-selected', String(p === cur));
+    b.classList.toggle('done', seen && n === 0);
+    b.classList.toggle('miss', seen && n > 0 && p !== cur);
+    let st = !seen ? 'Laukia' : n === 0 ? 'Užpildyta' : p === cur ? 'Pildoma' : `Trūksta: ${n}`;
+    if (p === 'hr' && locked) st += ', užrakinta';
+    b.querySelector('.st').textContent = st;
+  });
+}
+function showPage(p){
+  qa('.page').forEach(s => s.hidden = s.dataset.page !== p);
+  cur = p;
+  if (p !== 'done') visited.add(p);
+  $('bar').hidden = p === 'done';
+  $('backBtn').hidden = p === 'hr';
+  $('nextBtn').textContent = {hr:'Perduoti darbuotojui', emp:'Toliau: kartu su Personalo skyriumi', tog:'Užbaigti anketą'}[p] || '';
+  $('barMsg').textContent = '';
+  if (p === 'tog'){
+    const n = val('emp_name') || val('hr_name');
+    $('togName').textContent = n || 'Darbuotojas';
+  }
+  window.scrollTo(0, 0);
+  requestAnimationFrame(fitPads);
+  refresh();
+}
+function go(p, after){
+  if (p === 'hr' && locked && cur !== 'hr'){
+    askPin(() => { locked = false; go('hr', after); });
+    return;
+  }
+  if (cur === 'hr' && p !== 'hr'){
+    locked = true;
+    if (!val('emp_name') && val('hr_name')){
+      $('emp_name').value = val('hr_name');
+      $('declName').textContent = val('hr_name');
+    }
+  }
+  showPage(p);
+  if (after) setTimeout(after, 50);
+}
+qa('.step').forEach(b => b.onclick = () => { if (b.dataset.page !== cur) go(b.dataset.page); });
+$('backBtn').onclick = () => go(ORDER[ORDER.indexOf(cur) - 1]);
+$('nextBtn').onclick = () => {
+  if (cur === 'tog'){ finish(); return; }
+  const errs = validatePage(cur, true);
+  if (errs.length){
+    $('barMsg').textContent = `Užpildykite pažymėtus laukus (${errs.length}).`;
+    focusFirst(errs[0]); refresh(); return;
+  }
+  go(ORDER[ORDER.indexOf(cur) + 1]);
+};
+function finish(){
+  updateNeeds();
+  const bad = ORDER.map(p => [p, validatePage(p, true)]).filter(x => x[1].length);
+  if (bad.length){
+    const text = 'Trūksta duomenų: ' + bad.map(([p,e]) => `${NAMES[p]} (${e.length})`).join(', ') + '.';
+    const [p, errs] = bad[0];
+    const show = () => { $('barMsg').textContent = text; focusFirst(errs[0]); };
+    if (p === cur) show(); else go(p, show);
+    refresh(); return;
+  }
+  askPin(() => { locked = false; buildDoc(); showPage('done'); saveToSharePoint(); });
+}
+
+/* ---------- PIN ---------- */
+let pinCb = null;
+function askPin(cb){
+  pinCb = cb; $('pinIn').value = ''; $('pinMsg').hidden = true;
+  $('pinModal').hidden = false; setTimeout(() => $('pinIn').focus(), 50);
+}
+function closePin(){ $('pinModal').hidden = true; pinCb = null; }
+$('pinCancel').onclick = closePin;
+$('pinOk').onclick = () => {
+  if ($('pinIn').value === PIN){ const cb = pinCb; closePin(); cb && cb(); }
+  else { $('pinMsg').textContent = 'Neteisingas PIN kodas.'; $('pinMsg').hidden = false; $('pinIn').value = ''; $('pinIn').focus(); }
+};
+$('pinIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('pinOk').click(); if (e.key === 'Escape') closePin(); });
+
+/* ---------- composed detail strings ---------- */
+const validity = id => $(id + '_ind').checked ? 'galioja neterminuotai' : `galioja iki ${val(id)}`;
+function detail(key){
+  if (key === 'single') return `${val('emp_single_doc')}; ${validity('emp_single_to')}`;
+  if (key === 'kiddis') return `vaiko gimimo data ${val('emp_kiddis_dob')}; pažymėjimo Nr. ${val('emp_kiddis_no')}; ${validity('emp_kiddis_to')}`;
+  if (key === 'mydis') return `dalyvumo lygis ${val('emp_mydis_lvl')}; pažymėjimo Nr. ${val('emp_mydis_no')}; išduotas ${val('emp_mydis_from')}; ${validity('emp_mydis_to')}`;
+  return '';
+}
+const termEnd = () => $('hr_termend_ind').checked ? 'Susieta su įvykiu (žr. aplinkybes)' : val('hr_termend');
+
+/* ---------- summary document ---------- */
+const row = (l, v) => `<tr><td class="l">${esc(l)}</td><td>${v ? esc(v) : '—'}</td></tr>`;
+function rows(listId){
+  return qa('.rrow', $(listId)).map(r => {
+    const o = {}; qa('[data-k]', r).forEach(i => o[i.dataset.k] = i.value.trim()); return o;
+  });
+}
+function buildDoc(){
+  const edu = rows('eduList'), kids = radio('emp_haskids') === 'Taip' ? rows('kidList') : [];
+  const fte = radio('hr_fte') === 'Kita' ? val('hr_fte_o') : radio('hr_fte');
+  const prob = radio('hr_prob') === 'Taikomas';
+  const pay = radio('emp_pay') + (radio('emp_pay') === 'Du kartus per mėnesį' ? `; avansas ${val('emp_adv')} Eur` : '');
+  const yn = (n, key) => radio(n) + (radio(n) === 'Taip' ? `: ${detail(key)}` : '');
+  const sig = (id, cap) => `<div class="sig"><img src="${pads[id].png()}" alt="${esc(cap)}"><span>${esc(cap)}</span></div>`;
+
+  $('doc').innerHTML = `
+  <div class="dh"><h1>Darbuotojo anketa</h1><span>UAB „Iremas“</span></div>
+  <p>Užpildymo data: ${TODAY}</p>
+
+  <h2>ASMENINĖ INFORMACIJA</h2>
+  <table>
+    ${row('Vardas, pavardė', val('emp_name'))}
+    ${row('Gyvenamoji vieta', val('emp_addr'))}
+    ${row('Telefono numeris', '+370 ' + val('emp_phone'))}
+    ${row('El. paštas', val('emp_email'))}
+    ${row('Kontaktinis telefono numeris nelaimės atveju', '+370 ' + val('emp_ice'))}
+    ${row('Asmens kodas', val('emp_ak'))}
+  </table>
+
+  <h2>IŠSILAVINIMAS</h2>
+  <table>
+    ${row('Įgytas išsilavinimas', radio('emp_edu'))}
+    ${edu.map(e => row('Mokslo įstaigos pavadinimas', e.inst) + row('Specialybė, kvalifikacija', e.spec) + row('Dokumento išdavimo data', e.issued)).join('')}
+  </table>
+
+  <h2>DUOMENYS ATOSTOGŲ NORMAI IR PAPILDOMOMS POILSIO DIENOMS NUSTATYTI</h2>
+  <table>
+    ${row('Vaikai / globotiniai iki 14 metų', kids.length ? kids.map(k => `${k.name} (${k.dob})`).join('; ') : 'Nėra')}
+    ${kids.length ? row('Vienas (-a) auginu vaiką (-us) iki 14 metų', yn('emp_single','single')) : ''}
+    ${row('Vaikas ar globotinis turi negalią', yn('emp_kiddis','kiddis'))}
+    ${row('Man nustatytas neįgalumas', yn('emp_mydis','mydis'))}
+  </table>
+
+  <h2>DARBUOTOJO PATVIRTINIMAS</h2>
+  <p class="stmt">☑ Aš, ${esc(val('emp_name'))}, patvirtinu, kad laisva valia pateikiu šiuos duomenis, suprantu anketos klausimus, o pateikti atsakymai yra išsamūs ir teisingi.</p>
+  <p class="stmt">☑ Patvirtinu, kad suprantu pareigą laiku pranešti Personalo skyriui apie anketoje pateiktų duomenų pasikeitimus ir kitas aplinkybes, galinčias reikšmingai paveikti darbo sutarties sudarymą, vykdymą ar nutraukimą (LR darbo kodekso 25 straipsnio 1 dalis). Suprantu, kad už nepranešimą atsakomybė tenka man.</p>
+  <div class="sigs">${sig('sig_emp', `Darbuotojo parašas, ${TODAY}`)}</div>
+
+  <h2>DUOMENYS DARBO SUTARTIES VYKDYMUI</h2>
+  <table>
+    ${row('Pareigos', val('hr_pos'))}
+    ${row('Padalinys / skyrius', val('hr_dept'))}
+    ${row('Darbo pradžios data', val('hr_start'))}
+    ${row('Sutarties terminas', radio('hr_term'))}
+    ${radio('hr_term') === 'Terminuota' ? row('Sutarties pabaigos data', termEnd()) + row('Terminuotos sutarties aplinkybės', val('hr_termwhy')) : ''}
+    ${row('Darbo laikas (etato dydis)', fte)}
+    ${row('Ši darbovietė', radio('hr_main'))}
+    ${row('Darbo užmokestis bandomuoju laikotarpiu (Eur/mėn., neatskaičius mokesčių)', prob ? val('hr_sal1') : 'Bandomasis laikotarpis netaikomas')}
+    ${row(prob ? 'Darbo užmokestis po bandomojo laikotarpio (Eur/mėn., neatskaičius mokesčių)' : 'Darbo užmokestis (Eur/mėn., neatskaičius mokesčių)', val('hr_sal2'))}
+  </table>
+
+  <h2>INFORMACIJA DARBO UŽMOKESČIUI APSKAIČIUOTI IR IŠMOKĖTI</h2>
+  <table>
+    ${row('NPD taikymas', radio('emp_npd'))}
+    ${row('Banko sąskaitos numeris', val('emp_iban'))}
+    ${row('Darbo užmokestį prašau mokėti', pay)}
+    ${row('Papildomos sąlygos, susitarimai ir komentarai', val('hr_notes'))}
+  </table>
+
+  <h2>PILDOMA KARTU SU PERSONALO SKYRIAUS DARBUOTOJU</h2>
+  <p class="stmt">Patvirtinu, kad darbuotojas pateikė šiuos dokumentus duomenų tikrumui patvirtinti:</p>
+  ${DOCS.map(([id,t]) => `<p class="stmt">${$(id).checked ? '☑' : '☐'} ${esc(t)}</p>`).join('')}
+  <p class="stmt">Dokumentų pateikimo data: ${esc(val('tog_date'))}</p>
+  <div class="sigs">
+    ${sig('sig_emp2', 'Darbuotojo parašas')}
+    ${sig('sig_hr', `Personalo skyriaus darbuotojo parašas, ${val('tog_hr')}`)}
+  </div>`;
+}
+/* ---------- PDF ---------- */
+const PDF_DOCS = [
+  ['doc_id','Asmens tapatybės kortelė arba pasas'],
+  ['doc_kids','Vaiko (-ų) gimimo liudijimas (-ai)'],
+  ['doc_single','Dokumentas, patvirtinantis, kad darbuotojas vienas augina vaiką iki 14 metų arba vaiką su negalia iki 18 metų'],
+  ['doc_dis','Neįgalumą patvirtinantys dokumentai'],
+  ['doc_edu','Išsilavinimo dokumentas (-ai)'],
+  ['doc_courses','Kursų ir mokymų pažymėjimai, sertifikatai, licencijos']
+];
+function buildPdfDef(D){
+  const LAYOUT = {
+    hLineWidth: () => 0.6, vLineWidth: () => 0.6,
+    hLineColor: () => '#8E99A1', vLineColor: () => '#8E99A1',
+    paddingLeft: () => 5, paddingRight: () => 5, paddingTop: () => 3.5, paddingBottom: () => 3.5
+  };
+  const kv = (l, v) => [{text: l, bold: true, fillColor: '#EEF1F3'}, {text: v || '—'}];
+  const table = rows => ({table: {widths: ['40%','*'], body: rows, dontBreakRows: true}, layout: LAYOUT});
+  const h = t => ({text: t, style: 'h'});
+  const sec = (t, rows) => ({stack: [h(t), table(rows)], unbreakable: true});
+  const box = c => ({width: 15, canvas: [{type:'rect', x:0, y:1.5, w:9, h:9, lineWidth:0.8, lineColor:'#111111'}]
+    .concat(c ? [{type:'polyline', lineWidth:1.4, lineColor:'#111111', points:[{x:1.8,y:6.2},{x:4,y:8.6},{x:7.8,y:3}]}] : [])});
+  const chk = (c, t) => ({columns: [box(c), {text: t, width: '*'}], margin: [0,2,0,4]});
+  const sig = (img, cap) => ({width: 230, stack: [
+    img ? {image: img, fit: [200, 60], margin: [0,0,0,2]} : {text: ' ', margin: [0,0,0,60]},
+    {canvas: [{type:'line', x1:0, y1:0, x2:200, y2:0, lineWidth:0.6}]},
+    {text: cap, style: 'small', margin: [0,3,0,0]}
+  ]});
+  const yn = (a, doc) => a + (a === 'Taip' && doc ? `: ${doc}` : '');
+
+  const edu = D.edu.length ? D.edu.flatMap(e => [kv('Mokslo įstaigos pavadinimas', e.inst), kv('Specialybė, kvalifikacija', e.spec), kv('Dokumento išdavimo data', e.issued)]) : [];
+  const leave = [kv('Vaikai / globotiniai iki 14 metų (vardas, gimimo data)', D.kids.length ? D.kids.map(k => `${k.name}, ${k.dob}`).join('\n') : 'Nėra')];
+  if (D.kids.length) leave.push(kv('Vienas (-a) auginu vaiką (-us) iki 14 metų', yn(D.single, D.singleDoc)));
+  leave.push(kv('Vaikas ar globotinis turi negalią', yn(D.kidDis, D.kidDisDoc)));
+  leave.push(kv('Man nustatytas neįgalumas', yn(D.myDis, D.myDisDoc)));
+
+  const contract = [
+    kv('Pareigos', D.pos), kv('Padalinys / skyrius', D.dept), kv('Darbo pradžios data', D.start),
+    kv('Sutarties terminas', D.term)
+  ];
+  if (D.term === 'Terminuota') contract.push(kv('Sutarties pabaigos data', D.termEnd), kv('Terminuotos sutarties aplinkybės', D.termWhy));
+  contract.push(kv('Darbo laikas (etato dydis)', D.fte), kv('Ši darbovietė', D.main));
+  contract.push(kv('Darbo užmokestis bandomuoju laikotarpiu (Eur/mėn., neatskaičius mokesčių)', D.prob ? D.sal1 : 'Bandomasis laikotarpis netaikomas'));
+  contract.push(kv(D.prob ? 'Darbo užmokestis po bandomojo laikotarpio (Eur/mėn., neatskaičius mokesčių)' : 'Darbo užmokestis (Eur/mėn., neatskaičius mokesčių)', D.sal2));
+
+  return {
+    pageSize: 'A4',
+    pageMargins: [44, 46, 44, 54],
+    info: {title: `Darbuotojo anketa – ${D.name}`, author: 'UAB „Iremas“', subject: 'Darbuotojo anketa'},
+    footer: (p, n) => ({margin: [44, 18, 44, 0], columns: [
+      {text: `Darbuotojo anketa – ${D.name}`, style: 'small'},
+      {text: `Puslapis ${p} iš ${n}`, style: 'small', alignment: 'right'}
+    ]}),
+    content: [
+      {columns: [
+        {text: 'DARBUOTOJO ANKETA', fontSize: 16, bold: true},
+        {text: `Užpildymo data: ${D.date}`, alignment: 'right', margin: [0,5,0,0]}
+      ]},
+      {canvas: [{type:'line', x1:0, y1:4, x2:507, y2:4, lineWidth:1.4}], margin: [0,0,0,4]},
+
+      sec('ASMENINĖ INFORMACIJA', [
+        kv('Vardas, pavardė', D.name), kv('Gyvenamoji vieta', D.addr),
+        kv('Telefono numeris', '+370 ' + D.phone), kv('El. paštas', D.email),
+        kv('Kontaktinis telefono numeris nelaimės atveju', '+370 ' + D.ice), kv('Asmens kodas', D.ak)
+      ]),
+
+      sec('IŠSILAVINIMAS', [kv('Įgytas išsilavinimas', D.eduLevel), ...edu]),
+
+      sec('DUOMENYS ATOSTOGŲ NORMAI IR PAPILDOMOMS POILSIO DIENOMS NUSTATYTI', leave),
+
+      {stack: [
+        h('DARBUOTOJO PATVIRTINIMAS'),
+        chk(true, `Aš, ${D.name}, patvirtinu, kad laisva valia pateikiu šiuos duomenis, suprantu anketos klausimus, o pateikti atsakymai yra išsamūs ir teisingi.`),
+        chk(true, 'Patvirtinu, kad suprantu pareigą laiku pranešti Personalo skyriui apie anketoje pateiktų duomenų pasikeitimus ir kitas aplinkybes, galinčias reikšmingai paveikti darbo sutarties sudarymą, vykdymą ar nutraukimą (LR darbo kodekso 25 straipsnio 1 dalis). Suprantu, kad už nepranešimą atsakomybė tenka man.'),
+        {columns: [sig(D.sigEmp, `Darbuotojo parašas, ${D.date}`)], margin: [0,6,0,0]}
+      ], unbreakable: true},
+
+      sec('DUOMENYS DARBO SUTARTIES VYKDYMUI', contract),
+
+      sec('INFORMACIJA DARBO UŽMOKESČIUI APSKAIČIUOTI IR IŠMOKĖTI', [
+        kv('NPD taikymas', D.npd), kv('Banko sąskaitos numeris', D.iban),
+        kv('Darbo užmokestį prašau mokėti', D.pay),
+        kv('Papildomos sąlygos, susitarimai ir komentarai', D.notes)
+      ]),
+
+      {stack: [
+        h('PILDOMA KARTU SU PERSONALO SKYRIAUS DARBUOTOJU'),
+        {text: 'Patvirtinu, kad darbuotojas pateikė šiuos dokumentus duomenų tikrumui patvirtinti:', margin: [0,0,0,4]},
+        ...PDF_DOCS.map(([id, t]) => chk(D.docs[id], t)),
+        {text: `Dokumentų pateikimo data: ${D.docsDate}`, margin: [0,6,0,8]},
+        {columns: [
+          sig(D.sigEmp2, 'Darbuotojo parašas'),
+          sig(D.sigHr, `Personalo skyriaus darbuotojo parašas, ${D.hrName}`)
+        ], columnGap: 20}
+      ], unbreakable: true}
+    ],
+    styles: {
+      h: {fontSize: 10, bold: true, margin: [0, 14, 0, 5]},
+      small: {fontSize: 7.5, color: '#444444'}
+    },
+    defaultStyle: {font: 'Roboto', fontSize: 9.5, lineHeight: 1.2}
+  };
+}
+function pdfFileName(D){
+  const n = (D.name || 'darbuotojas').replace(/[\\/:*?"<>|]+/g, '').trim().replace(/\s+/g, '_');
+  return `Darbuotojo_anketa_${n}_${D.date}.pdf`;
+}
+
+function collect(){
+  const prob = radio('hr_prob') === 'Taikomas';
+  const docs = {}; DOCS.forEach(([id]) => docs[id] = $(id).checked);
+  return {
+    date: TODAY,
+    name: val('emp_name'), addr: val('emp_addr'), phone: val('emp_phone'), email: val('emp_email'),
+    ice: val('emp_ice'), ak: val('emp_ak'),
+    eduLevel: radio('emp_edu'), edu: rows('eduList'),
+    kids: radio('emp_haskids') === 'Taip' ? rows('kidList') : [],
+    single: radio('emp_single'), singleDoc: detail('single'),
+    kidDis: radio('emp_kiddis'), kidDisDoc: detail('kiddis'),
+    myDis: radio('emp_mydis'), myDisDoc: detail('mydis'),
+    pos: val('hr_pos'), dept: val('hr_dept'), start: val('hr_start'),
+    term: radio('hr_term'), termEnd: termEnd(), termWhy: val('hr_termwhy'),
+    fte: radio('hr_fte') === 'Kita' ? val('hr_fte_o') : radio('hr_fte'),
+    main: radio('hr_main'), prob, sal1: val('hr_sal1'), sal2: val('hr_sal2'),
+    npd: radio('emp_npd'), iban: val('emp_iban'),
+    pay: radio('emp_pay') + (radio('emp_pay') === 'Du kartus per mėnesį' ? `; avansas ${val('emp_adv')} Eur` : ''),
+    notes: val('hr_notes'),
+    docs, docsDate: val('tog_date'), hrName: val('tog_hr'),
+    sigEmp: pads.sig_emp.png(), sigEmp2: pads.sig_emp2.png(), sigHr: pads.sig_hr.png()
+  };
+}
+/* In the Claude viewer files are offered through the downloads capability;
+   anywhere else (e.g. GitHub Pages) a normal browser download is used. */
+const downloadsP = (window.claude && window.claude.use)
+  ? window.claude.use('downloads').catch(() => null)
+  : Promise.resolve(null);
+function doneStatus(text, ok){
+  const m = $('doneMsg'); m.textContent = text; m.className = 'msg' + (ok ? ' okmsg' : ''); m.hidden = false;
+}
+/* ---------- PDF blob (cached until the form changes) ---------- */
+let pdfCache = null;
+async function makePdf(){
+  if (pdfCache) return pdfCache;
+  if (!window.pdfMake || !pdfMake.vfs) throw new Error('Nepavyko įkelti PDF generatoriaus. Patikrinkite interneto ryšį.');
+  const D = collect();
+  const blob = await new Promise((res, rej) => {
+    try { pdfMake.createPdf(buildPdfDef(D)).getBlob(res); } catch (e) { rej(e); }
+  });
+  const t = new Date();
+  const name = pdfFileName(D).replace(/\.pdf$/, `_${pad2(t.getHours())}${pad2(t.getMinutes())}${pad2(t.getSeconds())}.pdf`);
+  pdfCache = {blob, name, D};
+  return pdfCache;
+}
+
+/* ---------- MSAL ---------- */
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);   // iPadOS reports as Mac
+let msalApp = null, account = null, demo = false;
+function setWho(){
+  $('who').hidden = !account; $('coLbl').hidden = !!account;
+  if (account){
+    $('whoName').textContent = account.name || account.username;
+    if (!val('tog_hr') && account.name) $('tog_hr').value = account.name;
+  }
+}
+function gateErr(t){ const m = $('gateMsg'); m.textContent = t; m.hidden = !t; }
+async function initAuth(){
+  if (!window.msal){ gateErr('Nepavyko įkelti Microsoft prisijungimo bibliotekos. Patikrinkite interneto ryšį.'); $('demoBtn').hidden = false; $('gate').hidden = false; return; }
+  try {
+    msalApp = new msal.PublicClientApplication({
+      auth: {clientId: CFG.clientId, authority: 'https://login.microsoftonline.com/' + CFG.tenantId,
+             redirectUri: location.href.split('#')[0].split('?')[0]},
+      cache: {cacheLocation: 'localStorage'}
+    });
+    await msalApp.initialize();
+    const r = await msalApp.handleRedirectPromise();
+    account = (r && r.account) || msalApp.getActiveAccount() || msalApp.getAllAccounts()[0] || null;
+    if (account){ msalApp.setActiveAccount(account); setWho(); $('gate').hidden = true; return; }
+  } catch (e) {
+    gateErr('Prisijungimo klaida: ' + (e.message || e)); $('demoBtn').hidden = false;
+  }
+  $('gate').hidden = false;
+}
+let loggingIn = false;
+$('loginBtn').onclick = async () => {
+  if (loggingIn || !msalApp) return;
+  loggingIn = true; gateErr('');
+  const req = {scopes: LOGIN_SCOPES, prompt: 'select_account'};
+  try {
+    if (IS_MOBILE){ await msalApp.loginRedirect(req); return; }   // nothing filled yet, redirect is safe here
+    const r = await msalApp.loginPopup(req);
+    account = r.account; msalApp.setActiveAccount(account); setWho(); $('gate').hidden = true;
+  } catch (e) {
+    if (['popup_window_error','empty_window_error','block_nested_popups'].includes(e.errorCode)){
+      try { await msalApp.loginRedirect(req); return; } catch (e2) { e = e2; }
+    }
+    if (e.errorCode !== 'user_cancelled') gateErr('Prisijungti nepavyko: ' + (e.message || e));
+    $('demoBtn').hidden = false;
+  } finally { loggingIn = false; }
+};
+$('demoBtn').onclick = () => { demo = true; $('gate').hidden = true; };
+$('logoutBtn').onclick = async () => {
+  if (!msalApp || !account) return;
+  try { await msalApp.logoutRedirect({account, postLogoutRedirectUri: location.href.split('#')[0].split('?')[0]}); }
+  catch (e) { /* ignore */ }
+};
+
+/* One interactive request at a time (avoids MSAL interaction_in_progress). */
+let tokenP = null;
+function spToken(interactive){
+  if (tokenP) return tokenP;
+  tokenP = (async () => {
+    const req = {scopes: SP_SCOPES, account};
+    try { return (await msalApp.acquireTokenSilent(req)).accessToken; }
+    catch (e) {
+      if (!interactive) throw Object.assign(new Error('Prisijungimo sesija baigėsi.'), {needsInteraction: true});
+      /* Popup, never redirect: a redirect would wipe the filled form. */
+      return (await msalApp.acquireTokenPopup(req)).accessToken;
+    }
+  })().finally(() => { tokenP = null; });
+  return tokenP;
+}
+async function sp(path, opts = {}, interactive = false){
+  const tok = await spToken(interactive);
+  const res = await fetch(CFG.siteUrl + path, {
+    method: opts.method || 'GET',
+    headers: Object.assign({Authorization: 'Bearer ' + tok, Accept: 'application/json;odata=nometadata'}, opts.headers || {}),
+    body: opts.body
+  });
+  if (!res.ok){
+    let m = res.statusText; const t = await res.text();
+    try { const j = JSON.parse(t); m = (j['odata.error'] && j['odata.error'].message.value) || (j.error && (j.error.message.value || j.error.message)) || m; } catch (e) {}
+    throw Object.assign(new Error(`SharePoint ${res.status}: ${m}`), {status: res.status});
+  }
+  return res.status === 204 ? null : res.json();
+}
+const lib = () => `/_api/web/lists/getbytitle('${CFG.library.replace(/'/g, "''")}')`;
+async function targetFolder(interactive){
+  const root = await sp(lib() + '/RootFolder?$select=ServerRelativeUrl', {}, interactive);
+  let folder = root.ServerRelativeUrl;
+  if (CFG.yearFolder){
+    const sub = folder + '/' + TODAY.slice(0, 4);
+    try { await sp(`/_api/web/GetFolderByServerRelativePath(decodedurl='${encodeURIComponent(sub.replace(/'/g, "''"))}')?$select=Name`); }
+    catch (e) {
+      if (e.status !== 404) throw e;
+      await sp(`/_api/web/folders/AddUsingPath(decodedurl='${encodeURIComponent(sub.replace(/'/g, "''"))}')`, {method: 'POST'});
+    }
+    folder = sub;
+  }
+  return folder;
+}
+async function uploadPdf(blob, name, interactive){
+  const folder = await targetFolder(interactive);
+  const f = await sp(`/_api/web/GetFolderByServerRelativePath(decodedurl='${encodeURIComponent(folder.replace(/'/g, "''"))}')` +
+    `/Files/AddUsingPath(decodedurl='${encodeURIComponent(name.replace(/'/g, "''"))}',overwrite=false)`,
+    {method: 'POST', body: blob, headers: {'Content-Type': 'application/pdf'}});
+  return SP_HOST + encodeURI(f.ServerRelativeUrl);
+}
+
+/* ---------- Save flow ---------- */
+let saving = false, savedUrl = null;
+function saveState(kind, html){
+  const b = $('saveBox'); b.className = 'savebox' + (kind ? ' ' + kind : ''); $('saveTxt').innerHTML = html;
+}
+function friendly(e){
+  const s = e.status;
+  if (e.needsInteraction) return 'Prisijungimo sesija baigėsi. Spauskite „Bandyti išsaugoti dar kartą“ ir prisijunkite iššokusiame lange.';
+  if (s === 401 || s === 403) return 'Neturite teisių įrašyti į biblioteką „' + esc(CFG.library) + '“. Kreipkitės į IT.';
+  if (s === 404) return 'Biblioteka „' + esc(CFG.library) + '“ nerasta svetainėje. Kreipkitės į IT.';
+  if (e.errorCode === 'user_cancelled') return 'Prisijungimo langas uždarytas. Bandykite dar kartą.';
+  if (e.errorCode && /popup/.test(e.errorCode)) return 'Naršyklė užblokavo prisijungimo langą. Leiskite iššokančius langus šiam puslapiui ir bandykite dar kartą.';
+  return esc(e.message || String(e));
+}
+async function saveToSharePoint(interactive){
+  if (saving || savedUrl) return;
+  saving = true; $('retryBtn').hidden = true; $('editBtn').disabled = true;
+  try {
+    saveState('', 'Ruošiamas PDF…');
+    const {blob, name} = await makePdf();
+    if (demo || !account){
+      saveState('bad', 'Neprisijungus anketa į SharePoint neišsaugoma. Atsisiųskite PDF kopiją.');
+      return;
+    }
+    saveState('', 'Išsaugoma SharePoint…');
+    savedUrl = await uploadPdf(blob, name, !!interactive);
+    saveState('ok', `Anketa išsaugota SharePoint: <a href="${esc(savedUrl)}" target="_blank" rel="noopener">${esc(name)}</a>`);
+    $('editBtn').hidden = true;     // saved record is final; changes = new anketa
+  } catch (e) {
+    saveState('bad', 'Išsaugoti nepavyko. ' + friendly(e) + ' Duomenys neprarasti — neuždarykite puslapio.');
+    $('retryBtn').hidden = false;
+  } finally {
+    saving = false; $('editBtn').disabled = false;
+  }
+}
+$('retryBtn').onclick = () => saveToSharePoint(true);   // user tap → popup allowed
+
+/* ---------- Local copy ---------- */
+/* In the Claude viewer files are offered through the downloads capability;
+   anywhere else (e.g. GitHub Pages) a normal browser download is used. */
+async function downloadCopy(){
+  try {
+    const {blob, name} = await makePdf();
+    const dl = await downloadsP;
+    if (dl){ await dl.save({filename: name, data: blob}); return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 15000);
+  } catch (e) {
+    if (!(e && e.code === 'declined')) saveState('bad', 'Nepavyko paruošti PDF kopijos. ' + esc(e.message || ''));
+  }
+}
+$('pdfBtn').onclick = downloadCopy;
+$('editBtn').onclick = () => { pdfCache = null; showPage('tog'); };
+let newArmed = false;
+$('newBtn').onclick = () => {
+  if (!newArmed){ newArmed = true; $('newBtn').textContent = 'Paspauskite dar kartą, kad ištrintumėte'; setTimeout(() => { newArmed = false; $('newBtn').textContent = 'Nauja anketa'; }, 4000); return; }
+  location.reload();
+};
+
+/* ---------- init ---------- */
+qa('.today').forEach(e => e.textContent = TODAY);
+qa('[data-type="pastdate"],[data-type="kid18"]').forEach(e => e.max = TODAY);
+qa('[data-type="validto"]').forEach(e => e.min = TODAY);
+$('tog_date').value = TODAY;
+prep(document);
+addEdu();
+applyShow();
+showPage('hr');
+initAuth();
+})();
+</script>
+</body>
+</html>
+
+</body></html>
