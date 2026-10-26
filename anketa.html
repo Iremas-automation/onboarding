@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!DOCTYPE html>
 <html lang="lt">
 <head>
@@ -138,6 +137,8 @@ input:disabled{opacity:.45}
 /* Modal */
 .who{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:14px}
 .who b{color:var(--ink);font-weight:600}
+.home{color:var(--steel);font-weight:600;font-size:15px;text-decoration:none;padding:6px 0}
+.home:hover{text-decoration:underline}
 .who .link{font-size:14px;min-height:36px;padding:4px}
 .gate{position:fixed;inset:0;z-index:60;background:var(--bg);display:grid;place-items:center;padding:20px}
 .gate .sheet{width:min(460px,100%);border:1px solid var(--line)}
@@ -195,6 +196,7 @@ input:disabled{opacity:.45}
 
 <header class="top">
   <div class="brand">
+    <a class="home" href="./">← Pradžia</a>
     <h1>Darbuotojo anketa</h1>
     <span class="who" id="who" hidden>Prisijungęs: <b id="whoName"></b><button type="button" class="link" id="logoutBtn">Atsijungti</button></span>
     <span class="co" id="coLbl">UAB „Iremas“</span>
@@ -474,7 +476,6 @@ input:disabled{opacity:.45}
     <p>Šioje dalyje matomi darbo sutarties ir darbo užmokesčio duomenys. Įveskite PIN kodą.</p>
     <input id="pinIn" inputmode="numeric" maxlength="6" aria-label="PIN kodas">
     <p class="msg" id="pinMsg" hidden></p>
-    <p class="hint demo">Prototipe PIN kodas: 1234</p>
     <div class="actions">
       <button type="button" class="btn ghost" id="pinCancel">Atšaukti</button>
       <button type="button" class="btn primary" id="pinOk">Patvirtinti</button>
@@ -512,7 +513,11 @@ const val = id => { const e = $(id); return e ? e.value.trim() : ''; };
 
 const ORDER = ['hr','emp','tog'];
 const NAMES = {hr:'Personalo skyrius', emp:'Darbuotojas', tog:'Kartu'};
-const PIN = '1234';
+/* PIN is stored only as a salted SHA-256 hash, never as plain text.
+   To change it, compute sha256('iremas-anketa:' + newPin) and paste it here. */
+const PIN_SALT = 'iremas-anketa:';
+const PIN_HASH = '01ff1200518e98c99b268d765bdc821af3f0daaaf9cac0e40752045267eacf13';
+const PIN_MAX_TRIES = 5, PIN_LOCK_SEC = 60;
 let cur = 'hr', locked = false;
 const visited = new Set(['hr']);
 
@@ -876,9 +881,27 @@ function askPin(cb){
 }
 function closePin(){ $('pinModal').hidden = true; pinCb = null; }
 $('pinCancel').onclick = closePin;
-$('pinOk').onclick = () => {
-  if ($('pinIn').value === PIN){ const cb = pinCb; closePin(); cb && cb(); }
-  else { $('pinMsg').textContent = 'Neteisingas PIN kodas.'; $('pinMsg').hidden = false; $('pinIn').value = ''; $('pinIn').focus(); }
+async function sha256hex(t){
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+  return Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, '0')).join('');
+}
+let pinFails = 0, pinLockedUntil = 0, pinChecking = false;
+function pinMsg(t){ $('pinMsg').textContent = t; $('pinMsg').hidden = false; }
+$('pinOk').onclick = async () => {
+  if (pinChecking) return;
+  const left = Math.ceil((pinLockedUntil - Date.now()) / 1000);
+  if (left > 0){ pinMsg(`Per daug bandymų. Palaukite ${left} s.`); return; }
+  pinChecking = true;
+  try {
+    let ok = false;
+    try { ok = (await sha256hex(PIN_SALT + $('pinIn').value)) === PIN_HASH; }
+    catch (e) { pinMsg('PIN patikra neveikia šioje naršyklėje (reikia https).'); return; }
+    if (ok){ pinFails = 0; const cb = pinCb; closePin(); cb && cb(); return; }
+    pinFails++;
+    if (pinFails >= PIN_MAX_TRIES){ pinFails = 0; pinLockedUntil = Date.now() + PIN_LOCK_SEC * 1000; pinMsg(`Per daug bandymų. Palaukite ${PIN_LOCK_SEC} s.`); }
+    else pinMsg(`Neteisingas PIN kodas. Liko bandymų: ${PIN_MAX_TRIES - pinFails}.`);
+    $('pinIn').value = ''; $('pinIn').focus();
+  } finally { pinChecking = false; }
 };
 $('pinIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('pinOk').click(); if (e.key === 'Escape') closePin(); });
 
@@ -1172,6 +1195,7 @@ $('loginBtn').onclick = async () => {
 $('demoBtn').onclick = () => { demo = true; $('gate').hidden = true; };
 $('logoutBtn').onclick = async () => {
   if (!msalApp || !account) return;
+  leavingOk = true;
   try { await msalApp.logoutRedirect({account, postLogoutRedirectUri: location.href.split('#')[0].split('?')[0]}); }
   catch (e) { /* ignore */ }
 };
@@ -1265,6 +1289,15 @@ async function saveToSharePoint(interactive){
 }
 $('retryBtn').onclick = () => saveToSharePoint(true);   // user tap → popup allowed
 
+/* Warn before leaving with filled-in, unsaved data (back link, reload, closing the tab). */
+let dirty = false;
+document.addEventListener('input', () => { dirty = true; });
+document.addEventListener('change', () => { dirty = true; });
+window.addEventListener('beforeunload', e => {
+  if (dirty && !savedUrl && !leavingOk){ e.preventDefault(); e.returnValue = ''; }
+});
+let leavingOk = false;
+
 /* ---------- Local copy ---------- */
 /* In the Claude viewer files are offered through the downloads capability;
    anywhere else (e.g. GitHub Pages) a normal browser download is used. */
@@ -1286,6 +1319,7 @@ $('editBtn').onclick = () => { pdfCache = null; showPage('tog'); };
 let newArmed = false;
 $('newBtn').onclick = () => {
   if (!newArmed){ newArmed = true; $('newBtn').textContent = 'Paspauskite dar kartą, kad ištrintumėte'; setTimeout(() => { newArmed = false; $('newBtn').textContent = 'Nauja anketa'; }, 4000); return; }
+  leavingOk = true;
   location.reload();
 };
 
@@ -1303,5 +1337,3 @@ initAuth();
 </script>
 </body>
 </html>
-
-</body></html>
