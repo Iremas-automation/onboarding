@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personalo skyrius – UAB Iremas</title>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"></script>
+<style>
+  :root{
+    --bg:#eef0f2;--surface:#ffffff;--ink:#1a1c1f;
+    --orange:#e8640a;--orange-dim:#c25509;
+    --muted:#6b7280;--border:#d8dce1;
+    --red:#c0392b;--green:#1e7e4a;
+    --radius:3px;--font:'Segoe UI',system-ui,sans-serif;
+    --shadow:0 8px 24px rgba(0,0,0,0.06);
+    --header-bg:#1a1c1f;--header-text:#fff;--header-muted:rgba(255,255,255,.5);
+  }
+  [data-theme="dark"]{
+    --bg:#15171a;--surface:#1e2125;--ink:#e4e6ea;
+    --orange:#e8640a;--orange-dim:#ff8a3d;
+    --muted:#8b919c;--border:#2d3138;
+    --red:#e2716a;--green:#3fae72;
+    --shadow:0 8px 24px rgba(0,0,0,0.4);
+    --header-bg:#0e0f11;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:40px;transition:background .2s,color .2s;}
+
+  .header{background:var(--header-bg);color:var(--header-text);}
+  .header-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;}
+  .logo{display:flex;align-items:center;gap:12px;}
+  .logo-mark{width:34px;height:34px;background:var(--orange);border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;}
+  .logo-name{font-size:14px;font-weight:600;}
+  .logo-sub{font-size:11px;color:var(--header-muted);}
+  .header-right{display:flex;align-items:center;gap:10px;}
+  .theme-toggle{width:30px;height:30px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:var(--header-text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .theme-toggle:hover{background:rgba(255,255,255,0.12);}
+
+  .login-overlay{position:fixed;inset:0;background:var(--header-bg);z-index:300;display:flex;align-items:center;justify-content:center;}
+  .login-overlay.hidden{display:none;}
+  .login-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:40px 44px;text-align:center;max-width:380px;width:90%;box-shadow:var(--shadow);}
+  .login-logo{width:46px;height:46px;background:var(--orange);border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;margin:0 auto 16px;}
+  .login-card h2{font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;}
+  .login-card p{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+  .login-err{color:var(--red)!important;margin:14px 0 0!important;}
+  .btn-ms{display:flex;align-items:center;gap:10px;background:#0078d4;color:#fff;border:none;border-radius:3px;padding:11px 20px;font-size:14px;font-weight:500;cursor:pointer;width:100%;justify-content:center;font-family:var(--font);transition:background .15s;}
+  .btn-ms:hover{background:#006cbd;}
+  .btn-ms:disabled{opacity:.6;cursor:default;}
+  .user-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:4px 10px 4px 4px;}
+  .user-avatar{width:24px;height:24px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+  .user-name{font-size:12px;color:var(--header-text);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .btn-logout{background:none;border:none;color:var(--header-muted);font-size:12px;cursor:pointer;padding:2px 4px;}
+  .btn-logout:hover{color:var(--header-text);}
+
+  .page-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 32px;}
+  .page-title{font-size:16px;font-weight:600;color:var(--ink);}
+
+  .hub{max-width:760px;margin:28px auto 0;padding:0 20px;}
+  .greet{font-size:13px;color:var(--muted);margin-bottom:16px;}
+  .greet b{color:var(--ink);font-weight:600;}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .tile{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:var(--radius);padding:22px 22px 20px;text-decoration:none;color:var(--ink);min-height:190px;transition:border-color .15s,box-shadow .15s,transform .15s;}
+  .tile:hover{border-color:var(--orange);box-shadow:var(--shadow);}
+  .tile:active{transform:translateY(1px);}
+  .tile:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+  .tile-step{font-size:11px;font-weight:700;color:var(--orange-dim);text-transform:uppercase;letter-spacing:.06em;}
+  .tile h3{font-size:17px;font-weight:700;line-height:1.25;}
+  .tile p{font-size:13px;color:var(--muted);line-height:1.55;flex:1;}
+  .tile-go{font-size:14px;font-weight:600;color:var(--orange-dim);}
+  .note{margin-top:16px;font-size:12px;color:var(--muted);line-height:1.5;}
+
+  @media(max-width:600px){
+    .header-inner,.page-bar{padding:12px 16px;}
+    .hub{padding:0 12px;margin-top:18px;}
+    .tiles{grid-template-columns:1fr;}
+    .tile{min-height:0;}
+  }
+</style>
+</head>
+<body>
+
+<div class="login-overlay hidden" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo">HR</div>
+    <h2>Personalo skyrius</h2>
+    <p>Prisijunkite su savo Iremas Microsoft paskyra.</p>
+    <button class="btn-ms" id="loginBtn" onclick="signIn()">
+      <svg width="20" height="20" viewBox="0 0 21 21" fill="none" aria-hidden="true"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+      Prisijungti su Microsoft
+    </button>
+    <p class="login-err" id="loginErr" hidden></p>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">HR</div>
+      <div>
+        <div class="logo-name">UAB Iremas</div>
+        <div class="logo-sub">Personalo skyrius</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="user-pill" id="userBadge" style="display:none;">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span class="user-name" id="userName">...</span>
+        <button class="btn-logout" onclick="signOut()" title="Atsijungti">✕</button>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Tamsus / šviesus režimas">🌙</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-bar">
+  <div class="page-title">Naujo darbuotojo priėmimas</div>
+</div>
+
+<div class="hub">
+  <p class="greet" id="greet"></p>
+  <div class="tiles">
+    <a class="tile" href="forma.html">
+      <span class="tile-step">IT · Onboarding</span>
+      <h3>Naujo darbuotojo registracija</h3>
+      <p>Užregistruokite naują darbuotoją. Tiesioginis vadovas gaus el. laišką su nuoroda IT poreikiams užpildyti.</p>
+      <span class="tile-go">Atidaryti →</span>
+    </a>
+    <a class="tile" href="anketa.html">
+      <span class="tile-step">Planšetėje</span>
+      <h3>Darbuotojo anketa</h3>
+      <p>Pildoma kartu su darbuotoju: sutarties duomenys, asmeninė informacija, dokumentų patikrinimas ir parašai. PDF išsaugomas SharePoint.</p>
+      <span class="tile-go">Atidaryti →</span>
+    </a>
+  </div>
+  <p class="note">Prisijungimas galioja abiem formoms, papildomai jungtis nereikia.</p>
+</div>
+
+<script>
+// ─────────── CONFIG ───────────
+// Ta pati app registracija kaip forma.html ir anketa.html — vienas prisijungimas visoms.
+const CLIENT_ID    = '31c9fa0a-b8a4-47ea-8eda-ebb3b5d8cd3c';   // Iremas Onboarding app registracija
+const TENANT_ID    = 'f300c84f-87f0-4d9e-8284-1e36dbe06fbe';   // Achemos grupės tenant
+const REDIRECT_URI = window.location.origin + window.location.pathname;
+const SP_SCOPES    = ['https://achemosgrupelt.sharepoint.com/AllSites.Read', 'https://achemosgrupelt.sharepoint.com/AllSites.Write'];
+const LOGIN_SCOPES = ['User.Read', ...SP_SCOPES];
+
+const msalInstance = new msal.PublicClientApplication({
+  auth: { clientId: CLIENT_ID, authority: `https://login.microsoftonline.com/${TENANT_ID}`, redirectUri: REDIRECT_URI },
+  cache: { cacheLocation: 'localStorage' }
+});
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);   // iPadOS rodo save kaip Mac
+function el(id){ return document.getElementById(id); }
+
+function loginError(msg){ const e = el('loginErr'); e.textContent = msg; e.hidden = !msg; }
+
+async function initAuth(){
+  try{
+    await msalInstance.initialize();
+    const resp = await msalInstance.handleRedirectPromise();
+    const acc = (resp && resp.account) || msalInstance.getActiveAccount() || msalInstance.getAllAccounts()[0];
+    if(acc){ handleSignedIn(acc); return; }
+  }catch(e){ loginError('Prisijungimo klaida: ' + e.message); }
+  el('loginOverlay').classList.remove('hidden');
+}
+function handleSignedIn(account){
+  msalInstance.setActiveAccount(account);
+  const initials = (account.name||'?').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  el('userAvatar').textContent = initials;
+  el('userName').textContent = account.name;
+  el('userBadge').style.display = 'flex';
+  el('greet').innerHTML = 'Prisijungta kaip <b></b>. Pasirinkite, ką norite pildyti.';
+  el('greet').querySelector('b').textContent = account.name || account.username;
+  el('loginOverlay').classList.add('hidden');
+}
+let busy = false;
+async function signIn(){
+  if(busy) return; busy = true; el('loginBtn').disabled = true; loginError('');
+  const request = { scopes: LOGIN_SCOPES, prompt: 'select_account' };
+  try{
+    if(IS_MOBILE){ await msalInstance.loginRedirect(request); return; }
+    const resp = await msalInstance.loginPopup(request);
+    handleSignedIn(resp.account);
+  }catch(e){
+    if(['block_nested_popups','popup_window_error','empty_window_error'].includes(e.errorCode)){
+      try{ await msalInstance.loginRedirect(request); return; }catch(e2){ loginError('Prisijungti nepavyko: ' + e2.message); }
+    } else if(e.errorCode !== 'user_cancelled'){ loginError('Prisijungti nepavyko: ' + e.message); }
+  }finally{ busy = false; el('loginBtn').disabled = false; }
+}
+function signOut(){
+  const acc = msalInstance.getActiveAccount() || msalInstance.getAllAccounts()[0];
+  if(!acc) return;
+  // Atsijungus čia, atsijungiama ir nuo forma.html bei anketa.html (bendra sesija).
+  if(IS_MOBILE) msalInstance.logoutRedirect({ account: acc, postLogoutRedirectUri: REDIRECT_URI });
+  else msalInstance.logoutPopup({ account: acc }).then(() => {
+    el('userBadge').style.display = 'none'; el('greet').textContent = '';
+    el('loginOverlay').classList.remove('hidden');
+  }).catch(()=>{});
+}
+
+function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); el('themeBtn').textContent = t==='dark'?'☀️':'🌙'; try{ localStorage.setItem('ire-onboarding-theme', t); }catch(e){} }
+function toggleTheme(){ const c = document.documentElement.getAttribute('data-theme')||'light'; applyTheme(c==='dark'?'light':'dark'); }
+let savedTheme = 'light'; try{ savedTheme = localStorage.getItem('ire-onboarding-theme') || 'light'; }catch(e){}
+applyTheme(savedTheme);
+
+initAuth();
+</script>
+</body>
+</html>
