@@ -137,8 +137,11 @@ input:disabled{opacity:.45}
 /* Modal */
 .who{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:14px}
 .who b{color:var(--ink);font-weight:600}
-.home{color:var(--steel);font-weight:600;font-size:15px;text-decoration:none;padding:6px 0}
-.home:hover{text-decoration:underline}
+.home{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1.5px solid var(--line);border-radius:6px;color:var(--ink);font-weight:600;font-size:15px;text-decoration:none;background:var(--field)}
+.home:hover{border-color:var(--ink)}
+.home:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+a.btn{display:inline-flex;align-items:center;text-decoration:none}
+a.btn.ghost{color:var(--ink)}
 .who .link{font-size:14px;min-height:36px;padding:4px}
 .gate{position:fixed;inset:0;z-index:60;background:var(--bg);display:grid;place-items:center;padding:20px}
 .gate .sheet{width:min(460px,100%);border:1px solid var(--line)}
@@ -196,7 +199,7 @@ input:disabled{opacity:.45}
 
 <header class="top">
   <div class="brand">
-    <a class="home" href="./">← Pradžia</a>
+    <a class="home" href="./" title="Grįžti į pagrindinį puslapį">← Pradžia</a>
     <h1>Darbuotojo anketa</h1>
     <span class="who" id="who" hidden>Prisijungęs: <b id="whoName"></b><button type="button" class="link" id="logoutBtn">Atsijungti</button></span>
     <span class="co" id="coLbl">UAB „Iremas“</span>
@@ -445,6 +448,7 @@ input:disabled{opacity:.45}
       <button type="button" class="btn ghost" id="pdfBtn">Atsisiųsti PDF kopiją</button>
       <button type="button" class="btn ghost" id="editBtn">Taisyti</button>
       <button type="button" class="btn ghost" id="newBtn">Nauja anketa</button>
+      <a class="btn ghost" href="./">Grįžti į pradžią</a>
     </div>
     <p class="msg" id="doneMsg" role="status" aria-live="polite" hidden></p>
   </div>
