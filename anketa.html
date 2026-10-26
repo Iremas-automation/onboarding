@@ -494,9 +494,9 @@ input:disabled{opacity:.45}
 const CFG = {
   clientId:   '31c9fa0a-b8a4-47ea-8eda-ebb3b5d8cd3c',            // Iremas Onboarding app registration
   tenantId:   'f300c84f-87f0-4d9e-8284-1e36dbe06fbe',            // Achemos grupė
-  siteUrl:    'https://achemosgrupelt.sharepoint.com/sites/IremasOnboarding', // PAKEISK, jei HR biblioteka kitoje svetainėje
-  library:    'Darbuotoju anketos',                               // bibliotekos pavadinimas (kaip matomas SharePoint)
-  yearFolder: true                                                // dėti į poaplankį pagal metus (2026, 2027 …)
+  siteUrl:    'https://achemosgrupelt.sharepoint.com/sites/PersonalasIREMAS',     // Personalo skyriaus svetainė
+  folder:     '/sites/PersonalasIREMAS/Bendrai naudojami dokumentai/ANKETA',     // aplankas, kur dedami PDF
+  yearFolder: false                                                              // true: dėti į poaplankį pagal metus (ANKETA/2026 …)
 };
 const SP_HOST = new URL(CFG.siteUrl).origin;
 const SP_SCOPES = [SP_HOST + '/AllSites.Write'];
@@ -1229,13 +1229,14 @@ async function sp(path, opts = {}, interactive = false){
   }
   return res.status === 204 ? null : res.json();
 }
-const lib = () => `/_api/web/lists/getbytitle('${CFG.library.replace(/'/g, "''")}')`;
+const folderApi = path => `/_api/web/GetFolderByServerRelativePath(decodedurl='${encodeURIComponent(path.replace(/'/g, "''"))}')`;
 async function targetFolder(interactive){
-  const root = await sp(lib() + '/RootFolder?$select=ServerRelativeUrl', {}, interactive);
-  let folder = root.ServerRelativeUrl;
+  let folder = CFG.folder;
+  try { await sp(folderApi(folder) + '?$select=Name', {}, interactive); }
+  catch (e) { if (e.status === 404) throw Object.assign(new Error('folder'), {status: 404}); throw e; }
   if (CFG.yearFolder){
     const sub = folder + '/' + TODAY.slice(0, 4);
-    try { await sp(`/_api/web/GetFolderByServerRelativePath(decodedurl='${encodeURIComponent(sub.replace(/'/g, "''"))}')?$select=Name`); }
+    try { await sp(folderApi(sub) + '?$select=Name'); }
     catch (e) {
       if (e.status !== 404) throw e;
       await sp(`/_api/web/folders/AddUsingPath(decodedurl='${encodeURIComponent(sub.replace(/'/g, "''"))}')`, {method: 'POST'});
@@ -1246,7 +1247,7 @@ async function targetFolder(interactive){
 }
 async function uploadPdf(blob, name, interactive){
   const folder = await targetFolder(interactive);
-  const f = await sp(`/_api/web/GetFolderByServerRelativePath(decodedurl='${encodeURIComponent(folder.replace(/'/g, "''"))}')` +
+  const f = await sp(folderApi(folder) +
     `/Files/AddUsingPath(decodedurl='${encodeURIComponent(name.replace(/'/g, "''"))}',overwrite=false)`,
     {method: 'POST', body: blob, headers: {'Content-Type': 'application/pdf'}});
   return SP_HOST + encodeURI(f.ServerRelativeUrl);
@@ -1260,8 +1261,8 @@ function saveState(kind, html){
 function friendly(e){
   const s = e.status;
   if (e.needsInteraction) return 'Prisijungimo sesija baigėsi. Spauskite „Bandyti išsaugoti dar kartą“ ir prisijunkite iššokusiame lange.';
-  if (s === 401 || s === 403) return 'Neturite teisių įrašyti į biblioteką „' + esc(CFG.library) + '“. Kreipkitės į IT.';
-  if (s === 404) return 'Biblioteka „' + esc(CFG.library) + '“ nerasta svetainėje. Kreipkitės į IT.';
+  if (s === 401 || s === 403) return 'Neturite teisių įrašyti į Personalo skyriaus aplanką „ANKETA“. Kreipkitės į IT.';
+  if (s === 404) return 'Aplankas „ANKETA“ nerastas Personalo skyriaus svetainėje. Kreipkitės į IT.';
   if (e.errorCode === 'user_cancelled') return 'Prisijungimo langas uždarytas. Bandykite dar kartą.';
   if (e.errorCode && /popup/.test(e.errorCode)) return 'Naršyklė užblokavo prisijungimo langą. Leiskite iššokančius langus šiam puslapiui ir bandykite dar kartą.';
   return esc(e.message || String(e));
