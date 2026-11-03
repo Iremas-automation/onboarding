@@ -35,7 +35,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 var(--sans
 
 /* Header + steps */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--surface);border-bottom:1px solid var(--line)}
-.brand{max-width:860px;margin:0 auto;padding:14px 20px 8px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{max-width:860px;margin:0 auto;padding:14px 20px 8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand-r{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .brand h1{margin:0;font:600 26px/1.1 var(--cond)}
 .brand .co{color:var(--muted);font-size:14px}
 .steps{max-width:860px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
@@ -65,6 +66,7 @@ main{max-width:860px;margin:0 auto;padding:26px 20px 130px}
 label,legend{display:block;font-weight:500;margin:0 0 6px;padding:0}
 .opt{color:var(--muted);font-weight:400;font-size:14px;margin-left:6px}
 input:not([type=radio]):not([type=checkbox]),textarea{
+  touch-action:pan-x pan-y pinch-zoom;
   width:100%;min-height:54px;padding:12px 14px;font:inherit;font-size:18px;color:var(--ink);
   background:var(--field);border:1.5px solid var(--line);border-radius:6px;-webkit-appearance:none;appearance:none}
 input[type=date]{min-height:54px}
@@ -140,6 +142,10 @@ input:disabled{opacity:.45}
 .home{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1.5px solid var(--line);border-radius:6px;color:var(--ink);font-weight:600;font-size:15px;text-decoration:none;background:var(--field)}
 .home:hover{border-color:var(--ink)}
 .home:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.fs-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1.5px solid var(--line);border-radius:6px;color:var(--ink);font:600 15px var(--sans);background:var(--field);cursor:pointer}
+.fs-btn:hover{border-color:var(--ink)}
+.fs-btn:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.fs-btn[aria-pressed="true"] .fs-on,.fs-btn:not([aria-pressed="true"]) .fs-off{display:none}
 a.btn{display:inline-flex;align-items:center;text-decoration:none}
 a.btn.ghost{color:var(--ink)}
 .who .link{font-size:14px;min-height:36px;padding:4px}
@@ -201,8 +207,11 @@ a.btn.ghost{color:var(--ink)}
   <div class="brand">
     <a class="home" href="./" title="Grįžti į pagrindinį puslapį">← Pradžia</a>
     <h1>Darbuotojo anketa</h1>
-    <span class="who" id="who" hidden>Prisijungęs: <b id="whoName"></b><button type="button" class="link" id="logoutBtn">Atsijungti</button></span>
-    <span class="co" id="coLbl">UAB „Iremas“</span>
+    <div class="brand-r">
+      <span class="who" id="who" hidden>Prisijungęs: <b id="whoName"></b><button type="button" class="link" id="logoutBtn">Atsijungti</button></span>
+      <span class="co" id="coLbl">UAB „Iremas“</span>
+      <button type="button" class="fs-btn" id="fsBtn" aria-pressed="false" title="Visas ekranas"><svg class="fs-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg class="fs-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-txt">Visas ekranas</span></button>
+    </div>
   </div>
   <nav class="steps" role="tablist" aria-label="Anketos dalys">
     <button class="step" role="tab" data-page="hr"><span class="n">1</span><span class="lbl">Personalo skyrius</span><span class="st">Pildoma</span></button>
@@ -564,7 +573,7 @@ function addEdu(){
     <div class="field"><label for="ei${i}">Mokslo įstaigos pavadinimas</label><input id="ei${i}" data-k="inst" data-req></div>
     <div class="two">
       <div class="field"><label for="es${i}">Specialybė, kvalifikacija</label><input id="es${i}" data-k="spec" data-req></div>
-      <div class="field"><label for="ed${i}">Dokumento išdavimo data</label><input id="ed${i}" type="date" max="${TODAY}" data-k="issued" data-req data-type="pastdate"></div>
+      <div class="field"><label for="ed${i}">Dokumento išdavimo metai</label><input id="ed${i}" class="mono" inputmode="numeric" maxlength="4" placeholder="pvz. 2015" data-k="issued" data-req data-type="year"></div>
     </div>`;
   $('eduList').appendChild(row); renumber('eduList','Mokslo įstaiga'); prep(row);
 }
@@ -675,6 +684,7 @@ function validateEl(el){
     case 'iban': return ibanErr(v);
     case 'money': return num(v) > 0 ? '' : 'Įveskite sumą eurais';
     case 'fte': { const n = num(v); return n > 0 && n <= 1 ? '' : 'Įveskite etato dalį nuo 0,05 iki 1'; }
+    case 'year': { const y = +v, max = +TODAY.slice(0, 4); return /^\d{4}$/.test(v) && y >= 1950 && y <= max ? '' : `Įveskite metus nuo 1950 iki ${max}`; }
     case 'kiddob': return kidErr(v);
     case 'pastdate': case 'validto': case 'enddate': case 'kid18': return dateErr(el.dataset.type, v);
   }
@@ -728,6 +738,8 @@ function fmt(el){
   } else if (t === 'iban'){
     const d = el.value.replace(/^LT/i,'').replace(/\D/g,'').slice(0,18);
     el.value = d.length ? ('LT' + d).replace(/(.{4})(?=.)/g,'$1 ') : '';
+  } else if (t === 'year'){
+    el.value = el.value.replace(/\D/g,'').slice(0,4);
   } else if (t === 'money' || t === 'fte'){
     el.value = el.value.replace(/[^\d.,\s]/g,'');
   }
@@ -951,7 +963,7 @@ function buildDoc(){
   <h2>IŠSILAVINIMAS</h2>
   <table>
     ${row('Įgytas išsilavinimas', radio('emp_edu'))}
-    ${edu.map(e => row('Mokslo įstaigos pavadinimas', e.inst) + row('Specialybė, kvalifikacija', e.spec) + row('Dokumento išdavimo data', e.issued)).join('')}
+    ${edu.map(e => row('Mokslo įstaigos pavadinimas', e.inst) + row('Specialybė, kvalifikacija', e.spec) + row('Dokumento išdavimo metai', e.issued)).join('')}
   </table>
 
   <h2>DUOMENYS ATOSTOGŲ NORMAI IR PAPILDOMOMS POILSIO DIENOMS NUSTATYTI</h2>
@@ -1026,7 +1038,7 @@ function buildPdfDef(D){
   ]});
   const yn = (a, doc) => a + (a === 'Taip' && doc ? `: ${doc}` : '');
 
-  const edu = D.edu.length ? D.edu.flatMap(e => [kv('Mokslo įstaigos pavadinimas', e.inst), kv('Specialybė, kvalifikacija', e.spec), kv('Dokumento išdavimo data', e.issued)]) : [];
+  const edu = D.edu.length ? D.edu.flatMap(e => [kv('Mokslo įstaigos pavadinimas', e.inst), kv('Specialybė, kvalifikacija', e.spec), kv('Dokumento išdavimo metai', e.issued)]) : [];
   const leave = [kv('Vaikai / globotiniai iki 14 metų (vardas, gimimo data)', D.kids.length ? D.kids.map(k => `${k.name}, ${k.dob}`).join('\n') : 'Nėra')];
   if (D.kids.length) leave.push(kv('Vienas (-a) auginu vaiką (-us) iki 14 metų', yn(D.single, D.singleDoc)));
   leave.push(kv('Vaikas ar globotinis turi negalią', yn(D.kidDis, D.kidDisDoc)));
@@ -1338,6 +1350,74 @@ addEdu();
 applyShow();
 showPage('hr');
 initAuth();
+})();
+
+/* ---------- Fullscreen (tablet) ----------
+   Fullscreen ends whenever another page opens, and browsers only allow entering it
+   after a tap. So the choice is remembered for this browser tab, and the first tap
+   on the next page turns it back on. */
+(function(){
+  const d = document, de = d.documentElement, btn = d.getElementById('fsBtn');
+  if (!btn) return;
+  const req = de.requestFullscreen || de.webkitRequestFullscreen;
+  const exit = d.exitFullscreen || d.webkitExitFullscreen;
+  const cur = () => d.fullscreenElement || d.webkitFullscreenElement;
+  const installed = window.matchMedia && matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
+  if (!req || installed){ btn.hidden = true; return; }       // e.g. iPhone, or already an installed app
+  const KEY = 'ire-fullscreen';
+  const want = v => {
+    try { if (v === undefined) return sessionStorage.getItem(KEY) === '1'; sessionStorage.setItem(KEY, v ? '1' : '0'); } catch (e) {}
+    return false;
+  };
+  let leaving = false;
+  const markLeaving = () => { leaving = true; setTimeout(() => { leaving = false; }, 3000); };
+  window.addEventListener('beforeunload', markLeaving);
+  window.addEventListener('pagehide', () => { leaving = true; });
+  window.addEventListener('pageshow', () => { leaving = false; });
+  d.addEventListener('click', e => { if (e.target.closest && e.target.closest('a[href]')) markLeaving(); }, true);
+  function enter(){
+    try { const p = req.call(de, {navigationUI: 'hide'}); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+  }
+  function sync(store){
+    const on = !!cur();
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.title = on ? 'Išeiti iš viso ekrano režimo' : 'Visas ekranas';
+    const t = btn.querySelector('.fs-txt'); if (t) t.textContent = on ? 'Išeiti' : 'Visas ekranas';
+    if (store && !leaving) want(on);
+  }
+  btn.addEventListener('click', () => { if (cur()) { try { exit.call(d); } catch (e) {} } else enter(); });
+  d.addEventListener('fullscreenchange', () => sync(true));
+  d.addEventListener('webkitfullscreenchange', () => sync(true));
+  if (want()){
+    const restore = e => {
+      d.removeEventListener('click', restore, true);
+      if (!cur() && !btn.contains(e.target)) enter();
+    };
+    d.addEventListener('click', restore, true);
+  }
+  sync(false);
+})();
+
+/* ---------- Stylus: tap text fields with the pen without starting handwriting ----------
+   Samsung "S Pen to text" (and similar pen handwriting) starts when the pen touches an
+   editable field. While the pen is over a text field, the field is made read-only, so the
+   pen tap only selects it; the field is then unlocked and focused, which opens the normal
+   keyboard. Finger input is not affected. */
+(function(){
+  const SEL = 'input:not([type]),input[type=text],input[type=email],input[type=tel],input[type=number],input[type=search],input[type=url],textarea';
+  const field = e => (e.target && e.target.closest) ? e.target.closest(SEL) : null;
+  function lock(el){ if (el && !el.readOnly && el !== document.activeElement){ el.readOnly = true; el.dataset.penLock = '1'; } }
+  function unlock(el){ if (el && el.dataset.penLock){ el.readOnly = false; delete el.dataset.penLock; } }
+  ['pointerover', 'pointermove', 'pointerdown'].forEach(type => document.addEventListener(type, e => {
+    if (e.pointerType === 'pen') lock(field(e));
+    else if (type === 'pointerdown') unlock(field(e));
+  }, true));
+  document.addEventListener('click', e => {
+    const el = field(e);
+    if (!el || !el.dataset.penLock) return;
+    unlock(el); el.focus();
+    try { const n = el.value.length; el.setSelectionRange(n, n); } catch (err) {}
+  }, true);
 })();
 </script>
 </body>
