@@ -443,26 +443,53 @@ initAuth();
   sync(false);
 })();
 
-/* ---------- Stylus: tap text fields with the pen without starting handwriting ----------
-   Samsung "S Pen to text" (and similar pen handwriting) starts when the pen touches an
-   editable field. While the pen is over a text field, the field is made read-only, so the
-   pen tap only selects it; the field is then unlocked and focused, which opens the normal
-   keyboard. Finger input is not affected. */
+/* ---------- Stylus: the pen never starts handwriting in text fields ----------
+   Samsung "S Pen to text" starts the moment the pen touches an EDITABLE field,
+   before the page can react. So text fields stay read-only until a finger (or mouse,
+   or keyboard Tab) reaches them; the pen only ever finds read-only fields.
+   Text is typed with the finger; the pen is for signatures and choice buttons. */
 (function(){
   const SEL = 'input:not([type]),input[type=text],input[type=email],input[type=tel],input[type=number],input[type=search],input[type=url],textarea';
-  const field = e => (e.target && e.target.closest) ? e.target.closest(SEL) : null;
-  function lock(el){ if (el && !el.readOnly && el !== document.activeElement){ el.readOnly = true; el.dataset.penLock = '1'; } }
-  function unlock(el){ if (el && el.dataset.penLock){ el.readOnly = false; delete el.dataset.penLock; } }
-  ['pointerover', 'pointermove', 'pointerdown'].forEach(type => document.addEventListener(type, e => {
-    if (e.pointerType === 'pen') lock(field(e));
-    else if (type === 'pointerdown') unlock(field(e));
-  }, true));
-  document.addEventListener('click', e => {
-    const el = field(e);
-    if (!el || !el.dataset.penLock) return;
-    unlock(el); el.focus();
-    try { const n = el.value.length; el.setSelectionRange(n, n); } catch (err) {}
+  const isText = el => !!(el && el.matches && el.matches(SEL));
+  let last = 'mouse';
+  function lock(el){ if (isText(el) && !el.readOnly){ el.readOnly = true; el.dataset.penLock = '1'; } }
+  function unlock(el){ if (el && el.dataset && el.dataset.penLock){ el.readOnly = false; delete el.dataset.penLock; } }
+  function lockAll(root){ if (isText(root)) lock(root); if (root.querySelectorAll) root.querySelectorAll(SEL).forEach(lock); }
+
+  let hintEl = null, hintT = 0;
+  function hint(){
+    if (!hintEl){
+      hintEl = document.createElement('div');
+      hintEl.setAttribute('role', 'status');
+      hintEl.textContent = 'Tekstą įveskite pirštu. Rašiklis skirtas parašui ir pasirinkimams.';
+      hintEl.style.cssText = 'position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 16px);transform:translateX(-50%);z-index:999;' +
+        'max-width:min(520px,calc(100% - 32px));padding:12px 18px;border-radius:6px;background:#16212A;color:#fff;' +
+        'font:500 16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25);' +
+        'opacity:0;transition:opacity .2s;pointer-events:none';
+      document.body.appendChild(hintEl);
+    }
+    hintEl.style.opacity = '1';
+    clearTimeout(hintT); hintT = setTimeout(() => { hintEl.style.opacity = '0'; }, 2600);
+  }
+
+  lockAll(document);
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) lockAll(n); })))
+    .observe(document.body, {childList: true, subtree: true});
+
+  document.addEventListener('pointerdown', e => {
+    last = e.pointerType || 'mouse';
+    const el = e.target && e.target.closest ? e.target.closest(SEL) : null;
+    if (!el) return;
+    if (last === 'pen'){
+      if (!el.readOnly){ lock(el); el.blur(); }      // e.g. the field currently being typed in
+      hint();
+    } else {
+      unlock(el);                                     // finger / mouse: normal keyboard
+    }
   }, true);
+  document.addEventListener('keydown', () => { last = 'key'; }, true);
+  document.addEventListener('focusin', e => { if (isText(e.target) && last !== 'pen') unlock(e.target); }, true);
+  document.addEventListener('focusout', e => { if (isText(e.target)) lock(e.target); }, true);
 })();
 </script>
 </body>
