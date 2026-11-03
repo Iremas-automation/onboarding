@@ -35,6 +35,10 @@
   .header-right{display:flex;align-items:center;gap:10px;}
   .theme-toggle{width:30px;height:30px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:var(--header-text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;}
   .theme-toggle:hover{background:rgba(255,255,255,0.12);}
+  .fs-btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:1px solid rgba(255,255,255,0.15);border-radius:4px;background:rgba(255,255,255,0.06);color:var(--header-text);font-family:var(--font);font-size:13px;cursor:pointer;}
+  .fs-btn:hover{background:rgba(255,255,255,0.12);}
+  .fs-btn[aria-pressed="true"] .fs-on,.fs-btn:not([aria-pressed="true"]) .fs-off{display:none}
+  @media(max-width:600px){.fs-btn .fs-txt{display:none;}}
 
   .login-overlay{position:fixed;inset:0;background:var(--header-bg);z-index:300;display:flex;align-items:center;justify-content:center;}
   .login-overlay.hidden{display:none;}
@@ -107,6 +111,7 @@
         <span class="user-name" id="userName">...</span>
         <button class="btn-logout" onclick="signOut()" title="Atsijungti">✕</button>
       </div>
+      <button type="button" class="fs-btn" id="fsBtn" aria-pressed="false" title="Visas ekranas"><svg class="fs-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg class="fs-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-txt">Visas ekranas</span></button>
       <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Tamsus / šviesus režimas">🌙</button>
     </div>
   </div>
@@ -204,6 +209,52 @@ let savedTheme = 'light'; try{ savedTheme = localStorage.getItem('ire-onboarding
 applyTheme(savedTheme);
 
 initAuth();
+
+/* ---------- Fullscreen (tablet) ----------
+   Fullscreen ends whenever another page opens, and browsers only allow entering it
+   after a tap. So the choice is remembered for this browser tab, and the first tap
+   on the next page turns it back on. */
+(function(){
+  const d = document, de = d.documentElement, btn = d.getElementById('fsBtn');
+  if (!btn) return;
+  const req = de.requestFullscreen || de.webkitRequestFullscreen;
+  const exit = d.exitFullscreen || d.webkitExitFullscreen;
+  const cur = () => d.fullscreenElement || d.webkitFullscreenElement;
+  const installed = window.matchMedia && matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
+  if (!req || installed){ btn.hidden = true; return; }       // e.g. iPhone, or already an installed app
+  const KEY = 'ire-fullscreen';
+  const want = v => {
+    try { if (v === undefined) return sessionStorage.getItem(KEY) === '1'; sessionStorage.setItem(KEY, v ? '1' : '0'); } catch (e) {}
+    return false;
+  };
+  let leaving = false;
+  const markLeaving = () => { leaving = true; setTimeout(() => { leaving = false; }, 3000); };
+  window.addEventListener('beforeunload', markLeaving);
+  window.addEventListener('pagehide', () => { leaving = true; });
+  window.addEventListener('pageshow', () => { leaving = false; });
+  d.addEventListener('click', e => { if (e.target.closest && e.target.closest('a[href]')) markLeaving(); }, true);
+  function enter(){
+    try { const p = req.call(de, {navigationUI: 'hide'}); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+  }
+  function sync(store){
+    const on = !!cur();
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.title = on ? 'Išeiti iš viso ekrano režimo' : 'Visas ekranas';
+    const t = btn.querySelector('.fs-txt'); if (t) t.textContent = on ? 'Išeiti' : 'Visas ekranas';
+    if (store && !leaving) want(on);
+  }
+  btn.addEventListener('click', () => { if (cur()) { try { exit.call(d); } catch (e) {} } else enter(); });
+  d.addEventListener('fullscreenchange', () => sync(true));
+  d.addEventListener('webkitfullscreenchange', () => sync(true));
+  if (want()){
+    const restore = e => {
+      d.removeEventListener('click', restore, true);
+      if (!cur() && !btn.contains(e.target)) enter();
+    };
+    d.addEventListener('click', restore, true);
+  }
+  sync(false);
+})();
 </script>
 </body>
 </html>
