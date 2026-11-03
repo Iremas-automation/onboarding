@@ -1434,17 +1434,37 @@ initAuth();
   new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) lockAll(n); })))
     .observe(document.body, {childList: true, subtree: true});
 
+  /* Pen tap on ANOTHER field while the keyboard is open: keep focus where it is during the
+     touch (so nothing editable is under the pen), then move focus once the pen lifts.
+     Focus goes straight from one editable field to the next, so the keyboard stays open. */
+  let pendingMove = null;
   document.addEventListener('pointerdown', e => {
     last = e.pointerType || 'mouse';
+    pendingMove = null;
     const el = e.target && e.target.closest ? e.target.closest(SEL) : null;
     if (!el) return;
     if (last === 'pen'){
-      if (!el.readOnly){ lock(el); el.blur(); }      // e.g. the field currently being typed in
+      const act = document.activeElement;
+      if (isText(act) && !act.readOnly && act !== el){
+        e.preventDefault();                           // focus (and keyboard) stays on the current field for now
+        pendingMove = el;
+        return;
+      }
+      if (!el.readOnly){ lock(el); el.blur(); }      // pen on the field being typed in
       hint();
     } else {
       unlock(el);                                     // finger / mouse: normal keyboard
     }
   }, true);
+  document.addEventListener('pointerup', e => {
+    const el = pendingMove; pendingMove = null;
+    if (!el || e.pointerType !== 'pen') return;
+    const over = e.target && e.target.closest ? e.target.closest(SEL) : null;
+    if (over !== el) return;                          // pen moved away (e.g. scrolling)
+    unlock(el); el.focus();
+    try { const n = el.value.length; el.setSelectionRange(n, n); } catch (err) {}
+  }, true);
+  document.addEventListener('pointercancel', () => { pendingMove = null; }, true);
   document.addEventListener('keydown', () => { last = 'key'; }, true);
   document.addEventListener('focusin', e => { if (isText(e.target) && last !== 'pen') unlock(e.target); }, true);
   document.addEventListener('focusout', e => { if (isText(e.target)) lock(e.target); }, true);
