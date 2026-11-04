@@ -157,6 +157,7 @@ input:disabled{opacity:.45}
 a.btn{display:inline-flex;align-items:center;text-decoration:none}
 a.btn.ghost{color:var(--ink)}
 .who .link{font-size:14px;min-height:36px;padding:4px}
+.who-foot{justify-content:flex-end;flex-wrap:wrap;margin:36px 0 0;padding-top:14px;border-top:1px solid var(--line)}
 .gate{position:fixed;inset:0;z-index:60;background:var(--bg);display:grid;place-items:center;padding:20px}
 .gate .sheet{width:min(460px,100%);border:1px solid var(--line)}
 .gate .btn{width:100%;margin-top:6px}
@@ -216,7 +217,6 @@ a.btn.ghost{color:var(--ink)}
     <a class="home" href="./" title="Grįžti į pagrindinį puslapį">← Pradžia</a>
     <h1>Darbuotojo anketa</h1>
     <div class="brand-r">
-      <span class="who" id="who" hidden>Prisijungęs: <b id="whoName"></b><button type="button" class="link" id="logoutBtn">Atsijungti</button></span>
       <span class="co" id="coLbl">UAB „Iremas“</span>
       <div class="lang" role="group" aria-label="Kalba">
         <button type="button" data-lang="lt" aria-pressed="true" title="Lietuvių" lang="lt">LT</button>
@@ -297,6 +297,7 @@ a.btn.ghost{color:var(--ink)}
   <div class="group">
     <div class="field"><label for="hr_notes">Papildomos sąlygos, susitarimai ir komentarai<span class="opt">neprivaloma</span></label><textarea id="hr_notes" rows="3"></textarea></div>
   </div>
+  <p class="who who-foot" id="who" hidden>Prisijungęs: <b id="whoName"></b><button type="button" class="link" id="logoutBtn">Atsijungti</button></p>
 </section>
 
 <!-- ============ 2. EMPLOYEE ============ -->
@@ -1483,7 +1484,7 @@ const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) |
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);   // iPadOS reports as Mac
 let msalApp = null, account = null, demo = false;
 function setWho(){
-  $('who').hidden = !account; $('coLbl').hidden = !!account;
+  $('who').hidden = !account;
   if (account){
     $('whoName').textContent = account.name || account.username;
     if (!val('tog_hr') && account.name) $('tog_hr').value = account.name;
