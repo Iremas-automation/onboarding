@@ -147,6 +147,11 @@ input:disabled{opacity:.45}
 .home:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
 .fs-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1.5px solid var(--line);border-radius:6px;color:var(--ink);font:600 15px var(--sans);background:var(--field);cursor:pointer}
 .fs-btn:hover{border-color:var(--ink)}
+.lang{display:inline-flex;border:1.5px solid var(--line);border-radius:6px;overflow:hidden;background:var(--field)}
+.lang button{min-height:44px;min-width:50px;padding:0 10px;border:0;border-left:1.5px solid var(--line);background:transparent;color:var(--muted);font:600 15px var(--sans);cursor:pointer}
+.lang button:first-child{border-left:0}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--onink)}
+.lang button:focus-visible{outline:3px solid var(--signal);outline-offset:-3px}
 .fs-btn:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
 .fs-btn[aria-pressed="true"] .fs-on,.fs-btn:not([aria-pressed="true"]) .fs-off{display:none}
 a.btn{display:inline-flex;align-items:center;text-decoration:none}
@@ -213,6 +218,11 @@ a.btn.ghost{color:var(--ink)}
     <div class="brand-r">
       <span class="who" id="who" hidden>Prisijungęs: <b id="whoName"></b><button type="button" class="link" id="logoutBtn">Atsijungti</button></span>
       <span class="co" id="coLbl">UAB „Iremas“</span>
+      <div class="lang" role="group" aria-label="Kalba">
+        <button type="button" data-lang="lt" aria-pressed="true" title="Lietuvių" lang="lt">LT</button>
+        <button type="button" data-lang="en" aria-pressed="false" title="English" lang="en">EN</button>
+        <button type="button" data-lang="ru" aria-pressed="false" title="Русский" lang="ru">RU</button>
+      </div>
       <button type="button" class="fs-btn" id="fsBtn" aria-pressed="false" title="Visas ekranas"><svg class="fs-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg class="fs-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-txt">Visas ekranas</span></button>
     </div>
   </div>
@@ -527,6 +537,299 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 const radio = n => { const c = document.querySelector(`input[name="${n}"]:checked`); return c ? c.value : ''; };
 const val = id => { const e = $(id); return e ? e.value.trim() : ''; };
 
+/* ================== KALBOS / LANGUAGES ==================
+   Lithuanian text is the key; [English, Russian] are the translations.
+   {0}, {1} … are values filled in by the program (numbers, dates, names).
+   To fix a translation, edit it here. A text missing from this list stays in Lithuanian.
+   The PDF always stays in Lithuanian (official personnel record). */
+const DECL1A = 'Aš,';
+const DECL1B = ', patvirtinu, kad laisva valia pateikiu šiuos duomenis, suprantu anketos klausimus, o pateikti atsakymai yra išsamūs ir teisingi.';
+const DECL2 = 'Suprantu pareigą laiku pranešti Personalo skyriui apie anketoje pateiktų duomenų pasikeitimus ir kitas aplinkybes, galinčias reikšmingai paveikti darbo sutarties sudarymą, vykdymą ar nutraukimą (LR darbo kodekso 25 straipsnio 1 dalis). Suprantu, kad už nepranešimą atsakomybė tenka man.';
+const I18N = {
+  /* header, steps */
+  'Darbuotojo anketa – UAB „Iremas“': ['Employee questionnaire – UAB „Iremas“', 'Анкета работника – UAB „Iremas“'],
+  'Darbuotojo anketa': ['Employee questionnaire', 'Анкета работника'],
+  '← Pradžia': ['← Home', '← Главная'],
+  'Grįžti į pagrindinį puslapį': ['Back to the main page', 'Вернуться на главную страницу'],
+  'Prisijungęs:': ['Signed in:', 'Вход выполнен:'],
+  'Atsijungti': ['Sign out', 'Выйти'],
+  'Kalba': ['Language', 'Язык'],
+  'Visas ekranas': ['Full screen', 'Полный экран'],
+  'Išeiti': ['Exit', 'Свернуть'],
+  'Išeiti iš viso ekrano režimo': ['Exit full screen', 'Выйти из полноэкранного режима'],
+  'Anketos dalys': ['Questionnaire parts', 'Разделы анкеты'],
+  'Personalo skyrius': ['HR department', 'Отдел кадров'],
+  'Darbuotojas': ['Employee', 'Работник'],
+  'Kartu': ['Together', 'Вместе'],
+  'Pildoma': ['In progress', 'Заполняется'],
+  'Laukia': ['Waiting', 'Ожидает'],
+  'Užpildyta': ['Completed', 'Заполнено'],
+  'Trūksta: {0}': ['Missing: {0}', 'Не заполнено: {0}'],
+  ', užrakinta': [', locked', ', заблокировано'],
+
+  /* 1. HR page */
+  'Darbo sutarties duomenys': ['Employment contract details', 'Данные трудового договора'],
+  'Užpildykite prieš perduodami planšetę darbuotojui. Darbuotojas šios dalies nematys, o grįžti į ją galima tik su PIN kodu.':
+    ['Fill this in before handing the tablet to the employee. The employee will not see this part, and it can only be reopened with the PIN code.',
+     'Заполните до передачи планшета работнику. Работник не увидит этот раздел, вернуться к нему можно только с PIN-кодом.'],
+  'Darbuotojo vardas, pavardė': ['Employee’s full name', 'Имя и фамилия работника'],
+  'Pareigos': ['Position', 'Должность'],
+  'Padalinys / skyrius': ['Unit / department', 'Подразделение / отдел'],
+  'Darbo pradžios data': ['Start date', 'Дата начала работы'],
+  'Sutarties terminas': ['Contract term', 'Срок договора'],
+  'Neterminuota': ['Open-ended', 'Бессрочный'],
+  'Terminuota': ['Fixed-term', 'Срочный'],
+  'Sutarties pabaigos data': ['Contract end date', 'Дата окончания договора'],
+  'Pabaiga susieta su įvykiu, ne data': ['The end is tied to an event, not a date', 'Окончание связано с событием, а не с датой'],
+  'Terminuotos sutarties aplinkybės': ['Reason for the fixed-term contract', 'Обстоятельства срочного договора'],
+  'pvz. laikinai nesančio darbuotojo pavadavimas': ['e.g. replacing a temporarily absent employee', 'напр. замещение временно отсутствующего работника'],
+  'Darbo laikas (etato dydis)': ['Working time (FTE)', 'Рабочее время (ставка)'],
+  'Pilnas etatas': ['Full time', 'Полная ставка'],
+  'Kitas': ['Other', 'Другое'],
+  'Etato dalis': ['FTE share', 'Доля ставки'],
+  'pvz. 0,6': ['e.g. 0.6', 'напр. 0,6'],
+  'Ši darbovietė': ['This workplace is', 'Это место работы'],
+  'Pagrindinė': ['Main', 'Основное'],
+  'Nepagrindinė': ['Secondary', 'Неосновное'],
+  'Darbo užmokestis': ['Salary', 'Заработная плата'],
+  'Sumos eurais per mėnesį, neatskaičius mokesčių.': ['Monthly amounts in euros, before taxes.', 'Суммы в евро в месяц, до вычета налогов.'],
+  'Bandomasis laikotarpis': ['Probation period', 'Испытательный срок'],
+  'Taikomas': ['Applies', 'Применяется'],
+  'Netaikomas': ['Does not apply', 'Не применяется'],
+  'Darbo užmokestis bandomuoju laikotarpiu': ['Salary during probation', 'Зарплата на испытательный срок'],
+  'Darbo užmokestis po bandomojo laikotarpio': ['Salary after probation', 'Зарплата после испытательного срока'],
+  'Eur/mėn.': ['EUR/month', 'евро/мес.'],
+  'Papildomos sąlygos, susitarimai ir komentarai': ['Additional terms, agreements and comments', 'Дополнительные условия, договорённости и комментарии'],
+  'neprivaloma': ['optional', 'необязательно'],
+
+  /* 2. Employee page */
+  'Jūsų duomenys': ['Your details', 'Ваши данные'],
+  'Užpildykite visus laukus. Duomenys naudojami tik darbo santykiams ir darbo užmokesčiui apskaičiuoti. Baigę grąžinkite planšetę Personalo skyriaus darbuotojui.':
+    ['Please fill in all fields. The data is used only for your employment and for calculating your salary. When you have finished, return the tablet to the HR staff member.',
+     'Заполните все поля. Данные используются только для трудовых отношений и расчёта заработной платы. После заполнения верните планшет сотруднику отдела кадров.'],
+  'Asmeninė informacija': ['Personal information', 'Личная информация'],
+  'Vardas, pavardė': ['Full name', 'Имя, фамилия'],
+  'Gyvenamoji vieta': ['Home address', 'Место жительства'],
+  'Gatvė, namo nr., miestas': ['Street, house no., city', 'Улица, номер дома, город'],
+  'Telefono numeris': ['Phone number', 'Номер телефона'],
+  'El. paštas': ['Email', 'Эл. почта'],
+  'Kontaktinis telefono numeris nelaimės atveju': ['Emergency contact phone number', 'Контактный телефон на случай чрезвычайной ситуации'],
+  'Asmens kodas': ['Personal ID code (asmens kodas)', 'Персональный код (asmens kodas)'],
+  'Išsilavinimas': ['Education', 'Образование'],
+  'Įgytas išsilavinimas': ['Education completed', 'Полученное образование'],
+  'Pagrindinis': ['Basic', 'Основное'],
+  'Vidurinis': ['Secondary', 'Среднее'],
+  'Profesinis': ['Vocational', 'Профессиональное'],
+  'Aukštesnysis': ['Post-secondary', 'Среднее специальное'],
+  'Aukštasis neuniversitetinis': ['Higher, non-university', 'Высшее неуниверситетское'],
+  'Aukštasis universitetinis': ['Higher, university', 'Высшее университетское'],
+  'Nebaigtas aukštasis': ['Incomplete higher', 'Неоконченное высшее'],
+  'Mokslo įstaiga': ['Educational institution', 'Учебное заведение'],
+  'Pašalinti': ['Remove', 'Удалить'],
+  'Mokslo įstaigos pavadinimas': ['Name of the institution', 'Название учебного заведения'],
+  'Specialybė, kvalifikacija': ['Speciality, qualification', 'Специальность, квалификация'],
+  'Dokumento išdavimo metai': ['Year the document was issued', 'Год выдачи документа'],
+  'pvz. 2015': ['e.g. 2015', 'напр. 2015'],
+  'Pridėti mokslo įstaigą': ['Add an institution', 'Добавить учебное заведение'],
+  'Atostogų norma ir papildomos poilsio dienos': ['Holiday entitlement and additional days off', 'Норма отпуска и дополнительные дни отдыха'],
+  'Ar turite vaikų ar globotinių iki 14 metų?': ['Do you have children or foster children under 14?', 'Есть ли у вас дети или опекаемые до 14 лет?'],
+  'Taip': ['Yes', 'Да'],
+  'Ne': ['No', 'Нет'],
+  'Vaikas': ['Child', 'Ребёнок'],
+  'Vardas': ['First name', 'Имя'],
+  'Gimimo data': ['Date of birth', 'Дата рождения'],
+  'Pridėti vaiką': ['Add a child', 'Добавить ребёнка'],
+  'Vienas (-a) auginu vaiką (-us) iki 14 metų': ['I am raising a child (children) under 14 on my own', 'Я один (одна) воспитываю ребёнка (детей) до 14 лет'],
+  'Patvirtinantis dokumentas ir jo numeris': ['Supporting document and its number', 'Подтверждающий документ и его номер'],
+  'Galiojimo data': ['Valid until', 'Действителен до'],
+  'Galioja neterminuotai': ['Valid indefinitely', 'Действует бессрочно'],
+  'Vaikas ar globotinis turi negalią': ['A child or foster child has a disability', 'Ребёнок или опекаемый имеет инвалидность'],
+  'Vaiko gimimo data': ['Child’s date of birth', 'Дата рождения ребёнка'],
+  'Pažymėjimo numeris': ['Certificate number', 'Номер справки'],
+  'Pažymėjimo galiojimo data': ['Certificate valid until', 'Справка действительна до'],
+  'Man nustatytas neįgalumas': ['I have a recognised disability', 'У меня установлена инвалидность'],
+  'Dalyvumo lygis': ['Level of participation', 'Уровень участия'],
+  'pvz. 40 %': ['e.g. 40 %', 'напр. 40 %'],
+  'Išdavimo data': ['Date of issue', 'Дата выдачи'],
+  'Darbo užmokesčio mokėjimas': ['Salary payment', 'Выплата заработной платы'],
+  'Neapmokestinamasis pajamų dydis (NPD)': ['Tax-free income allowance (NPD)', 'Необлагаемый размер дохода (NPD)'],
+  'Taikyti': ['Apply', 'Применять'],
+  'Netaikyti': ['Do not apply', 'Не применять'],
+  'Specialus NPD (30–55 % darbingumo lygis)': ['Special NPD (30–55 % working capacity)', 'Специальный NPD (трудоспособность 30–55 %)'],
+  'NPD gali būti taikomas tik vienoje darbovietėje.': ['NPD can be applied at one workplace only.', 'NPD может применяться только на одном месте работы.'],
+  'Banko sąskaitos numeris': ['Bank account number (IBAN)', 'Номер банковского счёта (IBAN)'],
+  'Darbo užmokestį prašau mokėti': ['Please pay my salary', 'Прошу выплачивать заработную плату'],
+  'Vieną kartą per mėnesį': ['Once a month', 'Один раз в месяц'],
+  'Du kartus per mėnesį': ['Twice a month', 'Два раза в месяц'],
+  'Avanso suma': ['Advance amount', 'Сумма аванса'],
+  'Eur': ['EUR', 'евро'],
+  'Darbuotojo patvirtinimas': ['Employee’s confirmation', 'Подтверждение работника'],
+  [DECL1A]: ['I,', 'Я,'],
+  [DECL1B]: [', confirm that I provide this information of my own free will, that I understand the questions in this questionnaire, and that my answers are complete and correct.',
+             ', подтверждаю, что добровольно предоставляю эти данные, понимаю вопросы анкеты, а мои ответы являются полными и правильными.'],
+  [DECL2]: ['I understand my obligation to inform the HR department in good time of any changes to the information in this questionnaire and of other circumstances that may significantly affect the conclusion, performance or termination of the employment contract (Article 25(1) of the Labour Code of the Republic of Lithuania). I understand that I am responsible if I fail to do so.',
+            'Я понимаю свою обязанность своевременно сообщать в отдел кадров об изменении данных, указанных в анкете, и о других обстоятельствах, которые могут существенно повлиять на заключение, исполнение или прекращение трудового договора (часть 1 статьи 25 Трудового кодекса Литовской Республики). Я понимаю, что ответственность за несообщение лежит на мне.'],
+  'Parašas': ['Signature', 'Подпись'],
+  'Išvalyti': ['Clear', 'Очистить'],
+  'Parašo laukas': ['Signature field', 'Поле для подписи'],
+  'Pasirašykite pirštu arba stilusu.': ['Sign with your finger or the stylus.', 'Распишитесь пальцем или стилусом.'],
+  'Užpildymo data:': ['Date:', 'Дата заполнения:'],
+
+  /* 3. Together */
+  'Dokumentų patikrinimas': ['Document check', 'Проверка документов'],
+  'Pildoma kartu su Personalo skyriaus darbuotoju. Pažymėkite, kuriuos dokumentus darbuotojas pateikė duomenų tikrumui patvirtinti.':
+    ['Completed together with the HR staff member. Tick the documents the employee has shown to confirm the information.',
+     'Заполняется вместе с сотрудником отдела кадров. Отметьте документы, которые работник предъявил для подтверждения данных.'],
+  'Žyma „Reikalingas“ rodo dokumentus, kurių reikia pagal anketos atsakymus.':
+    ['The “Required” tag marks documents needed based on the answers in the questionnaire.', 'Метка «Обязательно» отмечает документы, необходимые по ответам в анкете.'],
+  'Reikalingas': ['Required', 'Обязательно'],
+  'Asmens tapatybės kortelė arba pasas': ['ID card or passport', 'Удостоверение личности или паспорт'],
+  'Vaiko (-ų) gimimo liudijimas (-ai)': ['Child’s (children’s) birth certificate(s)', 'Свидетельство (-а) о рождении ребёнка (детей)'],
+  'Dokumentas, patvirtinantis, kad darbuotojas vienas augina vaiką iki 14 metų arba vaiką su negalia iki 18 metų':
+    ['Document confirming that the employee is raising a child under 14, or a child with a disability under 18, on their own',
+     'Документ, подтверждающий, что работник один воспитывает ребёнка до 14 лет или ребёнка с инвалидностью до 18 лет'],
+  'Neįgalumą patvirtinantys dokumentai': ['Documents confirming the disability', 'Документы, подтверждающие инвалидность'],
+  'Išsilavinimo dokumentas (-ai)': ['Education document(s)', 'Документ (-ы) об образовании'],
+  'Kursų ir mokymų pažymėjimai, sertifikatai, licencijos': ['Course and training certificates, licences', 'Свидетельства о курсах и обучении, сертификаты, лицензии'],
+  'Dokumentų pateikimo data': ['Date the documents were shown', 'Дата предъявления документов'],
+  'Personalo skyriaus darbuotojo vardas, pavardė': ['HR staff member’s full name', 'Имя и фамилия сотрудника отдела кадров'],
+  'Darbuotojo parašas': ['Employee’s signature', 'Подпись работника'],
+  'Darbuotojo parašo laukas': ['Employee’s signature field', 'Поле для подписи работника'],
+  'Personalo skyriaus darbuotojo parašas': ['HR staff member’s signature', 'Подпись сотрудника отдела кадров'],
+  'Personalo skyriaus darbuotojo parašo laukas': ['HR staff member’s signature field', 'Поле для подписи сотрудника отдела кадров'],
+
+  /* done page, bottom bar */
+  'Anketa užpildyta': ['Questionnaire completed', 'Анкета заполнена'],
+  'Anketa išsaugoma PDF formatu Personalo skyriaus SharePoint bibliotekoje. Planšetėje failas nelieka.':
+    ['The questionnaire is saved as a PDF in the HR SharePoint library. No file is kept on the tablet.', 'Анкета сохраняется в формате PDF в библиотеке SharePoint отдела кадров. На планшете файл не остаётся.'],
+  'Ruošiamas PDF…': ['Preparing the PDF…', 'Подготовка PDF…'],
+  'Išsaugoma SharePoint…': ['Saving to SharePoint…', 'Сохранение в SharePoint…'],
+  'Anketa išsaugota SharePoint: {0}': ['Questionnaire saved to SharePoint: {0}', 'Анкета сохранена в SharePoint: {0}'],
+  'Išsaugoti nepavyko. {0} Duomenys neprarasti — neuždarykite puslapio.': ['Saving failed. {0} No data has been lost — do not close the page.', 'Сохранить не удалось. {0} Данные не потеряны — не закрывайте страницу.'],
+  'Neprisijungus anketa į SharePoint neišsaugoma. Atsisiųskite PDF kopiją.': ['Without signing in, the questionnaire is not saved to SharePoint. Download a PDF copy.', 'Без входа анкета не сохраняется в SharePoint. Скачайте копию PDF.'],
+  'Nepavyko paruošti PDF kopijos. {0}': ['Could not prepare the PDF copy. {0}', 'Не удалось подготовить копию PDF. {0}'],
+  'Nepavyko įkelti PDF generatoriaus. Patikrinkite interneto ryšį.': ['Could not load the PDF generator. Check the internet connection.', 'Не удалось загрузить генератор PDF. Проверьте подключение к интернету.'],
+  'Bandyti išsaugoti dar kartą': ['Try saving again', 'Попробовать сохранить ещё раз'],
+  'Atsisiųsti PDF kopiją': ['Download a PDF copy', 'Скачать копию PDF'],
+  'Taisyti': ['Edit', 'Исправить'],
+  'Nauja anketa': ['New questionnaire', 'Новая анкета'],
+  'Paspauskite dar kartą, kad ištrintumėte': ['Tap again to clear', 'Нажмите ещё раз, чтобы очистить'],
+  'Grįžti į pradžią': ['Back to start', 'Вернуться в начало'],
+  'Atgal': ['Back', 'Назад'],
+  'Perduoti darbuotojui': ['Hand over to the employee', 'Передать работнику'],
+  'Toliau: kartu su Personalo skyriumi': ['Next: together with HR', 'Далее: вместе с отделом кадров'],
+  'Užbaigti anketą': ['Finish the questionnaire', 'Завершить анкету'],
+  'Užpildykite pažymėtus laukus ({0}).': ['Fill in the highlighted fields ({0}).', 'Заполните отмеченные поля ({0}).'],
+  'Trūksta duomenų:': ['Missing information:', 'Не хватает данных:'],
+
+  /* sign-in, PIN */
+  'Prisijunkite': ['Sign in', 'Войдите'],
+  'Prisijunkite su savo Iremas Microsoft paskyra. Užpildyta anketa bus išsaugota Personalo skyriaus SharePoint bibliotekoje.':
+    ['Sign in with your Iremas Microsoft account. The completed questionnaire will be saved in the HR SharePoint library.', 'Войдите с учётной записью Microsoft Iremas. Заполненная анкета будет сохранена в библиотеке SharePoint отдела кадров.'],
+  'Prisijungti su Microsoft': ['Sign in with Microsoft', 'Войти через Microsoft'],
+  'Tęsti be prisijungimo (tik PDF atsisiuntimas)': ['Continue without signing in (PDF download only)', 'Продолжить без входа (только скачивание PDF)'],
+  'Prisijungimo klaida: {0}': ['Sign-in error: {0}', 'Ошибка входа: {0}'],
+  'Prisijungti nepavyko: {0}': ['Sign-in failed: {0}', 'Не удалось войти: {0}'],
+  'Personalo skyriaus patvirtinimas': ['HR confirmation', 'Подтверждение отдела кадров'],
+  'Šioje dalyje matomi darbo sutarties ir darbo užmokesčio duomenys. Įveskite PIN kodą.': ['This part shows contract and salary details. Enter the PIN code.', 'В этом разделе видны данные договора и зарплаты. Введите PIN-код.'],
+  'PIN kodas': ['PIN code', 'PIN-код'],
+  'Atšaukti': ['Cancel', 'Отмена'],
+  'Patvirtinti': ['Confirm', 'Подтвердить'],
+  'Per daug bandymų. Palaukite {0} s.': ['Too many attempts. Wait {0} s.', 'Слишком много попыток. Подождите {0} с.'],
+  'Neteisingas PIN kodas. Liko bandymų: {0}.': ['Wrong PIN code. Attempts left: {0}.', 'Неверный PIN-код. Осталось попыток: {0}.'],
+  'PIN patikra neveikia šioje naršyklėje (reikia https).': ['The PIN check does not work in this browser (https is required).', 'Проверка PIN не работает в этом браузере (нужен https).'],
+
+  /* field messages */
+  'Privalomas laukas': ['Required field', 'Обязательное поле'],
+  'Pasirinkite vieną variantą': ['Choose one option', 'Выберите один вариант'],
+  'Pažymėkite, kad patvirtinate': ['Tick to confirm', 'Отметьте, чтобы подтвердить'],
+  'Šis dokumentas reikalingas pagal anketos atsakymus': ['This document is required based on the answers', 'Этот документ необходим по ответам в анкете'],
+  'Reikalingas parašas': ['Signature required', 'Нужна подпись'],
+  'Įveskite 8 skaitmenis po +370': ['Enter 8 digits after +370', 'Введите 8 цифр после +370'],
+  'Patikrinkite el. pašto adresą': ['Check the email address', 'Проверьте адрес эл. почты'],
+  'Įveskite sumą eurais': ['Enter an amount in euros', 'Введите сумму в евро'],
+  'Įveskite etato dalį nuo 0,05 iki 1': ['Enter an FTE share from 0.05 to 1', 'Введите долю ставки от 0,05 до 1'],
+  'Įveskite metus nuo 1950 iki {0}': ['Enter a year from 1950 to {0}', 'Введите год от 1950 до {0}'],
+  'Asmens kodą sudaro 11 skaitmenų': ['The personal ID code has 11 digits', 'Персональный код состоит из 11 цифр'],
+  'Asmens kodas neteisingas, patikrinkite skaitmenis': ['The personal ID code is not valid, check the digits', 'Персональный код неверный, проверьте цифры'],
+  'Asmens kodas turi prasidėti skaitmeniu nuo 1 iki 6': ['The personal ID code must start with a digit from 1 to 6', 'Персональный код должен начинаться с цифры от 1 до 6'],
+  'Asmens kode nurodyta neteisinga gimimo data': ['The date of birth in the personal ID code is not valid', 'В персональном коде указана неверная дата рождения'],
+  'Gimimo data: {0}': ['Date of birth: {0}', 'Дата рождения: {0}'],
+  'Asmens kodas tinkamas': ['The personal ID code is valid', 'Персональный код верный'],
+  'Sąskaitos numerį sudaro LT ir 18 skaitmenų': ['The account number is LT followed by 18 digits', 'Номер счёта состоит из LT и 18 цифр'],
+  'Sąskaitos numeris neteisingas, patikrinkite skaitmenis': ['The account number is not valid, check the digits', 'Номер счёта неверный, проверьте цифры'],
+  'Nurodykite gimimo datą': ['Enter the date of birth', 'Укажите дату рождения'],
+  'Data negali būti ateityje': ['The date cannot be in the future', 'Дата не может быть в будущем'],
+  'Nurodykite tik vaikus iki 14 metų': ['List only children under 14', 'Укажите только детей до 14 лет'],
+  'Nurodykite vaiką iki 18 metų': ['Enter a child under 18', 'Укажите ребёнка до 18 лет'],
+  'Pasirinkite datą': ['Choose a date', 'Выберите дату'],
+  'Dokumentas nebegalioja, patikrinkite datą': ['The document has expired, check the date', 'Срок действия документа истёк, проверьте дату'],
+  'Pabaigos data turi būti vėlesnė už darbo pradžios datą': ['The end date must be after the start date', 'Дата окончания должна быть позже даты начала работы']
+};
+
+const LANG_IDX = {en: 0, ru: 1};
+const LANG_NAME_LT = {en: 'anglų', ru: 'rusų'};          // for the PDF note
+let lang = 'lt', empLang = 'lt';
+const normWS = s => s.replace(/\s+/g, ' ').trim();
+const I18N_MAP = new Map(), I18N_TPL = [];
+for (const [k, v] of Object.entries(I18N)){
+  const key = normWS(k);
+  if (!/\{\d\}/.test(key)){ I18N_MAP.set(key, v); continue; }
+  let src = '^'; const order = [];
+  for (const part of key.split(/(\{\d\})/)){
+    const m = part.match(/^\{(\d)\}$/);
+    if (m){ src += '([\\s\\S]*?)'; order.push(+m[1]); }
+    else src += part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  I18N_TPL.push({re: new RegExp(src + '$'), order, v});
+}
+/* T(text) → text in the current language (or in `to`). Unknown text is returned unchanged. */
+function T(s, to){
+  to = to || lang;
+  if (to === 'lt' || s == null) return s;
+  s = String(s);
+  const m = s.match(/^(\s*)([\s\S]*?)(\s*)$/), core = normWS(m[2]);
+  if (!core) return s;
+  const hit = I18N_MAP.get(core);
+  if (hit) return m[1] + hit[LANG_IDX[to]] + m[3];
+  for (const t of I18N_TPL){
+    const r = core.match(t.re);
+    if (!r) continue;
+    let out = t.v[LANG_IDX[to]];
+    t.order.forEach((n, i) => { const fill = T(r[i + 1], to); out = out.replace('{' + n + '}', () => fill); });
+    return m[1] + out + m[3];
+  }
+  return s;
+}
+window.ireT = s => T(s);
+
+/* Page text: the Lithuanian original of every text node / attribute is remembered,
+   so switching back and forth always starts from Lithuanian. */
+const I18N_TXT = new WeakMap(), I18N_ATR = new WeakMap(), I18N_ATTRS = ['placeholder', 'title', 'aria-label'];
+function trNode(n){
+  if (n.nodeType === 3){
+    let r = I18N_TXT.get(n);
+    if (!r || n.nodeValue !== r.w) r = {o: n.nodeValue};      // new node, or changed by the program
+    r.w = T(r.o); I18N_TXT.set(n, r);
+    if (n.nodeValue !== r.w) n.nodeValue = r.w;
+    return;
+  }
+  if (n.nodeType !== 1) return;
+  if (n.matches('script,style,#doc,[data-noi18n]')) return;   // #doc = Lithuanian PDF preview
+  let a = I18N_ATR.get(n);
+  for (const at of I18N_ATTRS){
+    if (!n.hasAttribute(at)) continue;
+    if (!a){ a = {}; I18N_ATR.set(n, a); }
+    const curV = n.getAttribute(at);
+    if (!a[at] || curV !== a[at].w) a[at] = {o: curV};
+    a[at].w = T(a[at].o);
+    if (curV !== a[at].w) n.setAttribute(at, a[at].w);
+  }
+  n.childNodes.forEach(trNode);
+}
+const TITLE_LT = document.title;
+/* ==================================================== */
+
 const ORDER = ['hr','emp','tog'];
 const NAMES = {hr:'Personalo skyrius', emp:'Darbuotojas', tog:'Kartu'};
 /* PIN is stored only as a salted SHA-256 hash, never as plain text.
@@ -593,7 +896,7 @@ function addKid(){
 function renumber(listId, word){
   const rows = qa('.rrow', $(listId));
   rows.forEach((r,i) => {
-    r.querySelector('.rt').textContent = rows.length > 1 ? `${word} ${i+1}` : word;
+    r.querySelector('.rt').textContent = rows.length > 1 ? `${T(word)} ${i+1}` : T(word);
     r.querySelector('.rm').hidden = rows.length === 1;
   });
 }
@@ -613,7 +916,7 @@ function applyShow(){
     const [n,v] = el.dataset.show.split('=');
     el.hidden = radio(n) !== v;
   });
-  $('lbl_sal2').textContent = radio('hr_prob') === 'Netaikomas' ? 'Darbo užmokestis' : 'Darbo užmokestis po bandomojo laikotarpio';
+  $('lbl_sal2').textContent = T(radio('hr_prob') === 'Netaikomas' ? 'Darbo užmokestis' : 'Darbo užmokestis po bandomojo laikotarpio');
 }
 function isShown(el){
   for (let p = el; p; p = p.parentElement) if (p.hasAttribute && p.hasAttribute('data-show') && p.hidden) return false;
@@ -693,14 +996,15 @@ function validateEl(el){
   }
   return '';
 }
+const errEls = new Set();
 function setErr(el, msg){
   const w = el.closest('.field'); if (!w) return;
   let m = w.querySelector(':scope > .msg');
   if (msg){
     if (!m){ m = document.createElement('p'); m.className = 'msg'; w.appendChild(m); }
-    m.textContent = msg; w.classList.add('err'); el.setAttribute('aria-invalid','true');
+    m.textContent = T(msg); w.classList.add('err'); el.setAttribute('aria-invalid','true'); errEls.add(el);
   } else {
-    w.classList.remove('err'); if (m) m.remove(); el.removeAttribute('aria-invalid');
+    w.classList.remove('err'); if (m) m.remove(); el.removeAttribute('aria-invalid'); errEls.delete(el);
   }
 }
 const SEL = '[data-req],[data-type],[data-req-radio],[data-req-check],[data-sig],[data-need]';
@@ -721,6 +1025,7 @@ function focusFirst(el){
 
 /* ---------- input formatting + live validation ---------- */
 function prep(root){
+  if (lang !== 'lt' && root !== document) trNode(root);
   qa('input,textarea', root).forEach(e => {
     e.setAttribute('autocomplete','off'); e.setAttribute('autocorrect','off'); e.spellcheck = false;
   });
@@ -736,7 +1041,7 @@ function fmt(el){
   } else if (t === 'ak'){
     el.value = el.value.replace(/\D/g,'').slice(0,11);
     const info = akInfo(el.value), h = $('ak_hint');
-    h.textContent = info.dob ? `Gimimo data: ${info.dob}` : (info.ok ? 'Asmens kodas tinkamas' : '');
+    h.textContent = T(info.dob ? `Gimimo data: ${info.dob}` : (info.ok ? 'Asmens kodas tinkamas' : ''));
     h.className = 'hint' + (info.ok ? ' good' : '');
   } else if (t === 'iban'){
     const d = el.value.replace(/^LT/i,'').replace(/\D/g,'').slice(0,18);
@@ -832,10 +1137,17 @@ function refresh(){
     b.setAttribute('aria-selected', String(p === cur));
     b.classList.toggle('done', seen && n === 0);
     b.classList.toggle('miss', seen && n > 0 && p !== cur);
-    let st = !seen ? 'Laukia' : n === 0 ? 'Užpildyta' : p === cur ? 'Pildoma' : `Trūksta: ${n}`;
-    if (p === 'hr' && locked) st += ', užrakinta';
+    let st = T(!seen ? 'Laukia' : n === 0 ? 'Užpildyta' : p === cur ? 'Pildoma' : `Trūksta: ${n}`);
+    if (p === 'hr' && locked) st += T(', užrakinta');
     b.querySelector('.st').textContent = st;
   });
+}
+function barLabels(p){
+  $('nextBtn').textContent = T({hr:'Perduoti darbuotojui', emp:'Toliau: kartu su Personalo skyriumi', tog:'Užbaigti anketą'}[p] || '');
+  if (p === 'tog'){
+    const n = val('emp_name') || val('hr_name');
+    $('togName').textContent = n || T('Darbuotojas');
+  }
 }
 function showPage(p){
   qa('.page').forEach(s => s.hidden = s.dataset.page !== p);
@@ -843,12 +1155,8 @@ function showPage(p){
   if (p !== 'done') visited.add(p);
   $('bar').hidden = p === 'done';
   $('backBtn').hidden = p === 'hr';
-  $('nextBtn').textContent = {hr:'Perduoti darbuotojui', emp:'Toliau: kartu su Personalo skyriumi', tog:'Užbaigti anketą'}[p] || '';
+  barLabels(p);
   $('barMsg').textContent = '';
-  if (p === 'tog'){
-    const n = val('emp_name') || val('hr_name');
-    $('togName').textContent = n || 'Darbuotojas';
-  }
   window.scrollTo(0, 0);
   requestAnimationFrame(fitPads);
   refresh();
@@ -874,7 +1182,7 @@ $('nextBtn').onclick = () => {
   if (cur === 'tog'){ finish(); return; }
   const errs = validatePage(cur, true);
   if (errs.length){
-    $('barMsg').textContent = `Užpildykite pažymėtus laukus (${errs.length}).`;
+    $('barMsg').textContent = T(`Užpildykite pažymėtus laukus (${errs.length}).`);
     focusFirst(errs[0]); refresh(); return;
   }
   go(ORDER[ORDER.indexOf(cur) + 1]);
@@ -883,7 +1191,7 @@ function finish(){
   updateNeeds();
   const bad = ORDER.map(p => [p, validatePage(p, true)]).filter(x => x[1].length);
   if (bad.length){
-    const text = 'Trūksta duomenų: ' + bad.map(([p,e]) => `${NAMES[p]} (${e.length})`).join(', ') + '.';
+    const text = T('Trūksta duomenų:') + ' ' + bad.map(([p,e]) => `${T(NAMES[p])} (${e.length})`).join(', ') + '.';
     const [p, errs] = bad[0];
     const show = () => { $('barMsg').textContent = text; focusFirst(errs[0]); };
     if (p === cur) show(); else go(p, show);
@@ -905,7 +1213,7 @@ async function sha256hex(t){
   return Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, '0')).join('');
 }
 let pinFails = 0, pinLockedUntil = 0, pinChecking = false;
-function pinMsg(t){ $('pinMsg').textContent = t; $('pinMsg').hidden = false; }
+function pinMsg(t){ $('pinMsg').textContent = T(t); $('pinMsg').hidden = false; }
 $('pinOk').onclick = async () => {
   if (pinChecking) return;
   const left = Math.ceil((pinLockedUntil - Date.now()) / 1000);
@@ -915,7 +1223,7 @@ $('pinOk').onclick = async () => {
     let ok = false;
     try { ok = (await sha256hex(PIN_SALT + $('pinIn').value)) === PIN_HASH; }
     catch (e) { pinMsg('PIN patikra neveikia šioje naršyklėje (reikia https).'); return; }
-    if (ok){ pinFails = 0; const cb = pinCb; closePin(); cb && cb(); return; }
+    if (ok){ pinFails = 0; const cb = pinCb; closePin(); setLang('lt'); cb && cb(); return; }
     pinFails++;
     if (pinFails >= PIN_MAX_TRIES){ pinFails = 0; pinLockedUntil = Date.now() + PIN_LOCK_SEC * 1000; pinMsg(`Per daug bandymų. Palaukite ${PIN_LOCK_SEC} s.`); }
     else pinMsg(`Neteisingas PIN kodas. Liko bandymų: ${PIN_MAX_TRIES - pinFails}.`);
@@ -951,7 +1259,7 @@ function buildDoc(){
 
   $('doc').innerHTML = `
   <div class="dh"><h1>Darbuotojo anketa</h1><span>UAB „Iremas“</span></div>
-  <p>Užpildymo data: ${TODAY}</p>
+  <p>Užpildymo data: ${TODAY}${empLang !== 'lt' ? ` · Pildymo kalba: ${LANG_NAME_LT[empLang]}` : ''}</p>
 
   <h2>ASMENINĖ INFORMACIJA</h2>
   <table>
@@ -1033,6 +1341,7 @@ function buildPdfDef(D){
   const sec = (t, rows) => ({stack: [h(t), table(rows)], unbreakable: true});
   const box = c => ({width: 15, canvas: [{type:'rect', x:0, y:1.5, w:9, h:9, lineWidth:0.8, lineColor:'#111111'}]
     .concat(c ? [{type:'polyline', lineWidth:1.4, lineColor:'#111111', points:[{x:1.8,y:6.2},{x:4,y:8.6},{x:7.8,y:3}]}] : [])});
+  const trLine = t => ({text: t, italics: true, fontSize: 8.5, color: '#444444', margin: [15, -2, 0, 5]});
   const chk = (c, t) => ({columns: [box(c), {text: t, width: '*'}], margin: [0,2,0,4]});
   const sig = (img, cap) => ({width: 230, stack: [
     img ? {image: img, fit: [200, 60], margin: [0,0,0,2]} : {text: ' ', margin: [0,0,0,60]},
@@ -1067,7 +1376,7 @@ function buildPdfDef(D){
     content: [
       {columns: [
         {text: 'DARBUOTOJO ANKETA', fontSize: 16, bold: true},
-        {text: `Užpildymo data: ${D.date}`, alignment: 'right', margin: [0,5,0,0]}
+        {text: `Užpildymo data: ${D.date}` + (D.lang && D.lang !== 'lt' ? `\nPildymo kalba: ${LANG_NAME_LT[D.lang]}` : ''), alignment: 'right', margin: [0,5,0,0]}
       ]},
       {canvas: [{type:'line', x1:0, y1:4, x2:507, y2:4, lineWidth:1.4}], margin: [0,0,0,4]},
 
@@ -1084,7 +1393,9 @@ function buildPdfDef(D){
       {stack: [
         h('DARBUOTOJO PATVIRTINIMAS'),
         chk(true, `Aš, ${D.name}, patvirtinu, kad laisva valia pateikiu šiuos duomenis, suprantu anketos klausimus, o pateikti atsakymai yra išsamūs ir teisingi.`),
+        ...(D.declTr ? [trLine(D.declTr[0])] : []),
         chk(true, 'Patvirtinu, kad suprantu pareigą laiku pranešti Personalo skyriui apie anketoje pateiktų duomenų pasikeitimus ir kitas aplinkybes, galinčias reikšmingai paveikti darbo sutarties sudarymą, vykdymą ar nutraukimą (LR darbo kodekso 25 straipsnio 1 dalis). Suprantu, kad už nepranešimą atsakomybė tenka man.'),
+        ...(D.declTr ? [trLine(D.declTr[1])] : []),
         {columns: [sig(D.sigEmp, `Darbuotojo parašas, ${D.date}`)], margin: [0,6,0,0]}
       ], unbreakable: true},
 
@@ -1139,7 +1450,9 @@ function collect(){
     pay: radio('emp_pay') + (radio('emp_pay') === 'Du kartus per mėnesį' ? `; avansas ${val('emp_adv')} Eur` : ''),
     notes: val('hr_notes'),
     docs, docsDate: val('tog_date'), hrName: val('tog_hr'),
-    sigEmp: pads.sig_emp.png(), sigEmp2: pads.sig_emp2.png(), sigHr: pads.sig_hr.png()
+    sigEmp: pads.sig_emp.png(), sigEmp2: pads.sig_emp2.png(), sigHr: pads.sig_hr.png(),
+    lang: empLang,
+    declTr: empLang === 'lt' ? null : [T(DECL1A, empLang) + ' ' + val('emp_name') + T(DECL1B, empLang), T(DECL2, empLang)]
   };
 }
 /* In the Claude viewer files are offered through the downloads capability;
@@ -1176,7 +1489,7 @@ function setWho(){
     if (!val('tog_hr') && account.name) $('tog_hr').value = account.name;
   }
 }
-function gateErr(t){ const m = $('gateMsg'); m.textContent = t; m.hidden = !t; }
+function gateErr(t){ const m = $('gateMsg'); m.textContent = T(t); m.hidden = !t; }
 async function initAuth(){
   if (!window.msal){ gateErr('Nepavyko įkelti Microsoft prisijungimo bibliotekos. Patikrinkite interneto ryšį.'); $('demoBtn').hidden = false; $('gate').hidden = false; return; }
   try {
@@ -1274,8 +1587,10 @@ async function uploadPdf(blob, name, interactive){
 
 /* ---------- Save flow ---------- */
 let saving = false, savedUrl = null;
+let lastSave = null;
 function saveState(kind, html){
-  const b = $('saveBox'); b.className = 'savebox' + (kind ? ' ' + kind : ''); $('saveTxt').innerHTML = html;
+  lastSave = [kind, html];
+  const b = $('saveBox'); b.className = 'savebox' + (kind ? ' ' + kind : ''); $('saveTxt').innerHTML = T(html);
 }
 function friendly(e){
   const s = e.status;
@@ -1338,10 +1653,30 @@ $('pdfBtn').onclick = downloadCopy;
 $('editBtn').onclick = () => { pdfCache = null; showPage('tog'); };
 let newArmed = false;
 $('newBtn').onclick = () => {
-  if (!newArmed){ newArmed = true; $('newBtn').textContent = 'Paspauskite dar kartą, kad ištrintumėte'; setTimeout(() => { newArmed = false; $('newBtn').textContent = 'Nauja anketa'; }, 4000); return; }
+  if (!newArmed){ newArmed = true; $('newBtn').textContent = T('Paspauskite dar kartą, kad ištrintumėte'); setTimeout(() => { newArmed = false; $('newBtn').textContent = T('Nauja anketa'); }, 4000); return; }
   leavingOk = true;
   location.reload();
 };
+
+/* ---------- Language switch ---------- */
+function setLang(l){
+  if (!(l in LANG_IDX)) l = 'lt';
+  lang = l;
+  document.documentElement.lang = l;
+  trNode(document.body);
+  document.title = T(TITLE_LT);
+  qa('.lang button').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === l ? 'true' : 'false'));
+  // texts the program writes itself
+  applyShow(); refresh(); barLabels(cur);
+  renumber('eduList', 'Mokslo įstaiga'); renumber('kidList', 'Vaikas');
+  if ($('emp_ak').value) fmt($('emp_ak'));
+  Array.from(errEls).forEach(el => setErr(el, validateEl(el)));
+  if (lastSave) saveState(lastSave[0], lastSave[1]);
+  if (window.ireFsSync) window.ireFsSync();
+}
+qa('.lang button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+/* Remember the language in which the employee ticked the declarations (noted in the PDF). */
+['emp_c1', 'emp_c2'].forEach(id => $(id).addEventListener('change', e => { if (e.target.checked) empLang = lang; }));
 
 /* ---------- init ---------- */
 qa('.today').forEach(e => e.textContent = TODAY);
@@ -1384,8 +1719,9 @@ initAuth();
   function sync(store){
     const on = !!cur();
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    btn.title = on ? 'Išeiti iš viso ekrano režimo' : 'Visas ekranas';
-    const t = btn.querySelector('.fs-txt'); if (t) t.textContent = on ? 'Išeiti' : 'Visas ekranas';
+    const tr = window.ireT || (x => x);
+    btn.title = tr(on ? 'Išeiti iš viso ekrano režimo' : 'Visas ekranas');
+    const t = btn.querySelector('.fs-txt'); if (t) t.textContent = tr(on ? 'Išeiti' : 'Visas ekranas');
     if (store && !leaving) want(on);
   }
   btn.addEventListener('click', () => { if (cur()) { try { exit.call(d); } catch (e) {} } else enter(); });
@@ -1398,6 +1734,7 @@ initAuth();
     };
     d.addEventListener('click', restore, true);
   }
+  window.ireFsSync = () => sync(false);
   sync(false);
 })();
 
