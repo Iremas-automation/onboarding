@@ -85,10 +85,9 @@ input:focus,textarea:focus{outline:3px solid var(--signal);outline-offset:1px;bo
 .hint{margin:6px 0 0;color:var(--muted);font-size:14px}
 .ovr{margin-top:4px;display:flex;flex-wrap:wrap;align-items:center;gap:0 10px}
 .ovr .link{font-size:15px;font-weight:500;color:var(--muted)}
-.ovr-pin{color:var(--muted);font-size:13px}
 .ovr-on{margin:4px 0 0;padding:8px 12px;border-left:3px solid var(--signal);background:var(--field);font-size:15px;font-weight:500;width:100%}
 .ovr-on .link{font-size:15px;padding:4px;min-height:36px}
-.ovr.active .ovr-btn,.ovr.active .ovr-pin{display:none}
+.ovr.active .ovr-btn{display:none}
 .hint.good{color:var(--ok);font-weight:500}
 .msg{margin:6px 0 0;color:var(--err);font-size:15px;font-weight:500}
 .field.err input:not([type=radio]):not([type=checkbox]),.field.err textarea,.field.err .chips span,.field.err .pad{border-color:var(--err)}
@@ -323,7 +322,7 @@ a.btn.ghost{color:var(--ink)}
     <div class="field"><label for="emp_ice">Kontaktinis telefono numeris nelaimės atveju</label>
       <div class="affix"><span class="pre">+370</span><input id="emp_ice" class="r0l mono" inputmode="numeric" data-req data-type="phone" placeholder="6xx xxxxx"></div></div>
     <div class="field"><label for="emp_ak">Asmens kodas</label><input id="emp_ak" class="mono" inputmode="numeric" data-req data-type="ak" maxlength="11"><p class="hint" id="ak_hint"></p>
-      <div class="ovr" data-ovr="emp_ak"><button type="button" class="link ovr-btn">Neturiu asmens kodo</button><span class="ovr-pin">Reikia Personalo skyriaus PIN</span><p class="ovr-on" hidden>Neprivaloma — leido Personalo skyrius. <button type="button" class="link ovr-undo">Atšaukti</button></p></div></div>
+      <div class="ovr" data-ovr="emp_ak"><button type="button" class="link ovr-btn">Neturiu asmens kodo</button><p class="ovr-on" hidden>Neprivaloma — leido Personalo skyrius. <button type="button" class="link ovr-undo">Atšaukti</button></p></div></div>
   </div>
 
   <div class="group">
@@ -412,7 +411,7 @@ a.btn.ghost{color:var(--ink)}
     </fieldset>
     <div class="field"><label for="emp_iban">Banko sąskaitos numeris</label>
       <input id="emp_iban" class="mono" inputmode="numeric" data-req data-type="iban" placeholder="LT00 0000 0000 0000 0000">
-      <div class="ovr" data-ovr="emp_iban"><button type="button" class="link ovr-btn">Neturiu banko sąskaitos</button><span class="ovr-pin">Reikia Personalo skyriaus PIN</span><p class="ovr-on" hidden>Neprivaloma — leido Personalo skyrius. <button type="button" class="link ovr-undo">Atšaukti</button></p></div></div>
+      <div class="ovr" data-ovr="emp_iban"><button type="button" class="link ovr-btn">Neturiu banko sąskaitos</button><p class="ovr-on" hidden>Neprivaloma — leido Personalo skyrius. <button type="button" class="link ovr-undo">Atšaukti</button></p></div></div>
     <fieldset class="field"><legend>Darbo užmokestį prašau mokėti</legend>
       <div class="chips" data-req-radio>
         <label><input type="radio" name="emp_pay" value="Vieną kartą per mėnesį"><span>Vieną kartą per mėnesį</span></label>
@@ -751,7 +750,6 @@ const I18N = {
   /* asmens kodas / bank account override */
   'Neturiu asmens kodo': ['I don’t have a personal ID code', 'У меня нет персонального кода'],
   'Neturiu banko sąskaitos': ['I don’t have a bank account', 'У меня нет банковского счёта'],
-  'Reikia Personalo skyriaus PIN': ['Requires the HR PIN', 'Нужен PIN отдела кадров'],
   'Neprivaloma — leido Personalo skyrius.': ['Not required — approved by HR.', 'Необязательно — разрешено отделом кадров.'],
   'Leidimas palikti lauką tuščią. Įveskite Personalo skyriaus PIN kodą.': ['Permission to leave this field empty. Enter the HR PIN code.', 'Разрешение оставить поле пустым. Введите PIN-код отдела кадров.'],
 
