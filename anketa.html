@@ -83,6 +83,12 @@ input:focus,textarea:focus{outline:3px solid var(--signal);outline-offset:1px;bo
 .affix input.r0r{border-radius:6px 0 0 6px}
 .mono{font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .hint{margin:6px 0 0;color:var(--muted);font-size:14px}
+.ovr{margin-top:4px;display:flex;flex-wrap:wrap;align-items:center;gap:0 10px}
+.ovr .link{font-size:15px;font-weight:500;color:var(--muted)}
+.ovr-pin{color:var(--muted);font-size:13px}
+.ovr-on{margin:4px 0 0;padding:8px 12px;border-left:3px solid var(--signal);background:var(--field);font-size:15px;font-weight:500;width:100%}
+.ovr-on .link{font-size:15px;padding:4px;min-height:36px}
+.ovr.active .ovr-btn,.ovr.active .ovr-pin{display:none}
 .hint.good{color:var(--ok);font-weight:500}
 .msg{margin:6px 0 0;color:var(--err);font-size:15px;font-weight:500}
 .field.err input:not([type=radio]):not([type=checkbox]),.field.err textarea,.field.err .chips span,.field.err .pad{border-color:var(--err)}
@@ -316,7 +322,8 @@ a.btn.ghost{color:var(--ink)}
     <div class="field"><label for="emp_email">El. paštas</label><input id="emp_email" type="email" inputmode="email" autocapitalize="off" data-req data-type="email"></div>
     <div class="field"><label for="emp_ice">Kontaktinis telefono numeris nelaimės atveju</label>
       <div class="affix"><span class="pre">+370</span><input id="emp_ice" class="r0l mono" inputmode="numeric" data-req data-type="phone" placeholder="6xx xxxxx"></div></div>
-    <div class="field"><label for="emp_ak">Asmens kodas</label><input id="emp_ak" class="mono" inputmode="numeric" data-req data-type="ak" maxlength="11"><p class="hint" id="ak_hint"></p></div>
+    <div class="field"><label for="emp_ak">Asmens kodas</label><input id="emp_ak" class="mono" inputmode="numeric" data-req data-type="ak" maxlength="11"><p class="hint" id="ak_hint"></p>
+      <div class="ovr" data-ovr="emp_ak"><button type="button" class="link ovr-btn">Neturiu asmens kodo</button><span class="ovr-pin">Reikia Personalo skyriaus PIN</span><p class="ovr-on" hidden>Neprivaloma — leido Personalo skyrius. <button type="button" class="link ovr-undo">Atšaukti</button></p></div></div>
   </div>
 
   <div class="group">
@@ -404,7 +411,8 @@ a.btn.ghost{color:var(--ink)}
       <p class="hint">NPD gali būti taikomas tik vienoje darbovietėje.</p>
     </fieldset>
     <div class="field"><label for="emp_iban">Banko sąskaitos numeris</label>
-      <input id="emp_iban" class="mono" inputmode="numeric" data-req data-type="iban" placeholder="LT00 0000 0000 0000 0000"></div>
+      <input id="emp_iban" class="mono" inputmode="numeric" data-req data-type="iban" placeholder="LT00 0000 0000 0000 0000">
+      <div class="ovr" data-ovr="emp_iban"><button type="button" class="link ovr-btn">Neturiu banko sąskaitos</button><span class="ovr-pin">Reikia Personalo skyriaus PIN</span><p class="ovr-on" hidden>Neprivaloma — leido Personalo skyrius. <button type="button" class="link ovr-undo">Atšaukti</button></p></div></div>
     <fieldset class="field"><legend>Darbo užmokestį prašau mokėti</legend>
       <div class="chips" data-req-radio>
         <label><input type="radio" name="emp_pay" value="Vieną kartą per mėnesį"><span>Vieną kartą per mėnesį</span></label>
@@ -500,7 +508,7 @@ a.btn.ghost{color:var(--ink)}
 <div class="modal" id="pinModal" hidden role="dialog" aria-modal="true" aria-labelledby="pinT">
   <div class="sheet">
     <h2 id="pinT">Personalo skyriaus patvirtinimas</h2>
-    <p>Šioje dalyje matomi darbo sutarties ir darbo užmokesčio duomenys. Įveskite PIN kodą.</p>
+    <p id="pinTxt">Šioje dalyje matomi darbo sutarties ir darbo užmokesčio duomenys. Įveskite PIN kodą.</p>
     <input id="pinIn" inputmode="numeric" maxlength="6" aria-label="PIN kodas">
     <p class="msg" id="pinMsg" hidden></p>
     <div class="actions">
@@ -739,6 +747,13 @@ const I18N = {
   'Per daug bandymų. Palaukite {0} s.': ['Too many attempts. Wait {0} s.', 'Слишком много попыток. Подождите {0} с.'],
   'Neteisingas PIN kodas. Liko bandymų: {0}.': ['Wrong PIN code. Attempts left: {0}.', 'Неверный PIN-код. Осталось попыток: {0}.'],
   'PIN patikra neveikia šioje naršyklėje (reikia https).': ['The PIN check does not work in this browser (https is required).', 'Проверка PIN не работает в этом браузере (нужен https).'],
+
+  /* asmens kodas / bank account override */
+  'Neturiu asmens kodo': ['I don’t have a personal ID code', 'У меня нет персонального кода'],
+  'Neturiu banko sąskaitos': ['I don’t have a bank account', 'У меня нет банковского счёта'],
+  'Reikia Personalo skyriaus PIN': ['Requires the HR PIN', 'Нужен PIN отдела кадров'],
+  'Neprivaloma — leido Personalo skyrius.': ['Not required — approved by HR.', 'Необязательно — разрешено отделом кадров.'],
+  'Leidimas palikti lauką tuščią. Įveskite Personalo skyriaus PIN kodą.': ['Permission to leave this field empty. Enter the HR PIN code.', 'Разрешение оставить поле пустым. Введите PIN-код отдела кадров.'],
 
   /* field messages */
   'Privalomas laukas': ['Required field', 'Обязательное поле'],
@@ -1203,7 +1218,12 @@ function finish(){
 
 /* ---------- PIN ---------- */
 let pinCb = null;
-function askPin(cb){
+const PIN_TXT_DEFAULT = 'Šioje dalyje matomi darbo sutarties ir darbo užmokesčio duomenys. Įveskite PIN kodą.';
+let pinKeepLang = false;
+function askPin(cb, opts){
+  opts = opts || {};
+  pinKeepLang = !!opts.keepLang;
+  $('pinTxt').textContent = T(opts.msg || PIN_TXT_DEFAULT);
   pinCb = cb; $('pinIn').value = ''; $('pinMsg').hidden = true;
   $('pinModal').hidden = false; setTimeout(() => $('pinIn').focus(), 50);
 }
@@ -1224,7 +1244,7 @@ $('pinOk').onclick = async () => {
     let ok = false;
     try { ok = (await sha256hex(PIN_SALT + $('pinIn').value)) === PIN_HASH; }
     catch (e) { pinMsg('PIN patikra neveikia šioje naršyklėje (reikia https).'); return; }
-    if (ok){ pinFails = 0; const cb = pinCb; closePin(); setLang('lt'); cb && cb(); return; }
+    if (ok){ pinFails = 0; const cb = pinCb; closePin(); if (!pinKeepLang) setLang('lt'); cb && cb(); return; }
     pinFails++;
     if (pinFails >= PIN_MAX_TRIES){ pinFails = 0; pinLockedUntil = Date.now() + PIN_LOCK_SEC * 1000; pinMsg(`Per daug bandymų. Palaukite ${PIN_LOCK_SEC} s.`); }
     else pinMsg(`Neteisingas PIN kodas. Liko bandymų: ${PIN_MAX_TRIES - pinFails}.`);
@@ -1269,7 +1289,7 @@ function buildDoc(){
     ${row('Telefono numeris', '+370 ' + val('emp_phone'))}
     ${row('El. paštas', val('emp_email'))}
     ${row('Kontaktinis telefono numeris nelaimės atveju', '+370 ' + val('emp_ice'))}
-    ${row('Asmens kodas', val('emp_ak'))}
+    ${row('Asmens kodas', outVal('emp_ak'))}
   </table>
 
   <h2>IŠSILAVINIMAS</h2>
@@ -1307,7 +1327,7 @@ function buildDoc(){
   <h2>INFORMACIJA DARBO UŽMOKESČIUI APSKAIČIUOTI IR IŠMOKĖTI</h2>
   <table>
     ${row('NPD taikymas', radio('emp_npd'))}
-    ${row('Banko sąskaitos numeris', val('emp_iban'))}
+    ${row('Banko sąskaitos numeris', outVal('emp_iban'))}
     ${row('Darbo užmokestį prašau mokėti', pay)}
     ${row('Papildomos sąlygos, susitarimai ir komentarai', val('hr_notes'))}
   </table>
@@ -1437,7 +1457,7 @@ function collect(){
   return {
     date: TODAY,
     name: val('emp_name'), addr: val('emp_addr'), phone: val('emp_phone'), email: val('emp_email'),
-    ice: val('emp_ice'), ak: val('emp_ak'),
+    ice: val('emp_ice'), ak: outVal('emp_ak'),
     eduLevel: radio('emp_edu'), edu: rows('eduList'),
     kids: radio('emp_haskids') === 'Taip' ? rows('kidList') : [],
     single: radio('emp_single'), singleDoc: detail('single'),
@@ -1447,7 +1467,7 @@ function collect(){
     term: radio('hr_term'), termEnd: termEnd(), termWhy: val('hr_termwhy'),
     fte: radio('hr_fte') === 'Kita' ? val('hr_fte_o') : radio('hr_fte'),
     main: radio('hr_main'), prob, sal1: val('hr_sal1'), sal2: val('hr_sal2'),
-    npd: radio('emp_npd'), iban: val('emp_iban'),
+    npd: radio('emp_npd'), iban: outVal('emp_iban'),
     pay: radio('emp_pay') + (radio('emp_pay') === 'Du kartus per mėnesį' ? `; avansas ${val('emp_adv')} Eur` : ''),
     notes: val('hr_notes'),
     docs, docsDate: val('tog_date'), hrName: val('tog_hr'),
@@ -1658,6 +1678,28 @@ $('newBtn').onclick = () => {
   leavingOk = true;
   location.reload();
 };
+
+/* ---------- HR override: asmens kodas / bank account not required ----------
+   The field stays on screen; if something is typed it is still checked.
+   Left empty, the summary and PDF show "Nenurodyta (leido Personalo skyrius)". */
+const OVR_NOTE = 'Nenurodyta (leido Personalo skyrius)';
+const overridden = id => !!($(id) && $(id).dataset.override);
+const outVal = id => val(id) || (overridden(id) ? OVR_NOTE : '');
+function setOverride(id, on){
+  const el = $(id), box = document.querySelector(`.ovr[data-ovr="${id}"]`);
+  if (on){ el.removeAttribute('data-req'); el.dataset.override = '1'; }
+  else { el.setAttribute('data-req', ''); delete el.dataset.override; }
+  box.classList.toggle('active', on);
+  box.querySelector('.ovr-on').hidden = !on;
+  setErr(el, on && !el.value.trim() ? '' : (el.closest('.field').classList.contains('err') ? validateEl(el) : ''));
+  refresh();
+}
+qa('.ovr').forEach(box => {
+  const id = box.dataset.ovr;
+  box.querySelector('.ovr-btn').addEventListener('click', () =>
+    askPin(() => setOverride(id, true), {keepLang: true, msg: 'Leidimas palikti lauką tuščią. Įveskite Personalo skyriaus PIN kodą.'}));
+  box.querySelector('.ovr-undo').addEventListener('click', () => setOverride(id, false));
+});
 
 /* ---------- Language switch ---------- */
 function setLang(l){
