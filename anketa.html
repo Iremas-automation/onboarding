@@ -286,7 +286,13 @@ a.btn.ghost{color:var(--ink)}
 
   <div class="group">
     <h3>Darbo užmokestis</h3>
-    <p class="sub">Sumos eurais per mėnesį, neatskaičius mokesčių.</p>
+    <p class="sub" id="salSub">Sumos eurais per mėnesį, neatskaičius mokesčių.</p>
+    <fieldset class="field"><legend>Atlygio forma</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="hr_paytype" value="Mėnesinis" checked><span>Mėnesinis</span></label>
+        <label><input type="radio" name="hr_paytype" value="Valandinis"><span>Valandinis</span></label>
+      </div>
+    </fieldset>
     <fieldset class="field"><legend>Bandomasis laikotarpis</legend>
       <div class="chips" data-req-radio>
         <label><input type="radio" name="hr_prob" value="Taikomas"><span>Taikomas</span></label>
@@ -294,9 +300,9 @@ a.btn.ghost{color:var(--ink)}
       </div>
     </fieldset>
     <div class="field" data-show="hr_prob=Taikomas"><label for="hr_sal1">Darbo užmokestis bandomuoju laikotarpiu</label>
-      <div class="affix"><input id="hr_sal1" class="r0r mono" inputmode="decimal" data-req data-type="money"><span class="suf">Eur/mėn.</span></div></div>
+      <div class="affix"><input id="hr_sal1" class="r0r mono" inputmode="decimal" data-req data-type="money"><span class="suf sal-unit">Eur/mėn.</span></div></div>
     <div class="field"><label for="hr_sal2" id="lbl_sal2">Darbo užmokestis po bandomojo laikotarpio</label>
-      <div class="affix"><input id="hr_sal2" class="r0r mono" inputmode="decimal" data-req data-type="money"><span class="suf">Eur/mėn.</span></div></div>
+      <div class="affix"><input id="hr_sal2" class="r0r mono" inputmode="decimal" data-req data-type="money"><span class="suf sal-unit">Eur/mėn.</span></div></div>
   </div>
 
   <div class="group">
@@ -607,6 +613,11 @@ const I18N = {
   'Darbo užmokestis bandomuoju laikotarpiu': ['Salary during probation', 'Зарплата на испытательный срок'],
   'Darbo užmokestis po bandomojo laikotarpio': ['Salary after probation', 'Зарплата после испытательного срока'],
   'Eur/mėn.': ['EUR/month', 'евро/мес.'],
+  'Eur/val.': ['EUR/hour', 'евро/час'],
+  'Atlygio forma': ['Pay type', 'Форма оплаты'],
+  'Mėnesinis': ['Monthly', 'Месячная'],
+  'Valandinis': ['Hourly', 'Почасовая'],
+  'Sumos eurais už valandą, neatskaičius mokesčių.': ['Hourly amounts in euros, before taxes.', 'Суммы в евро за час, до вычета налогов.'],
   'Papildomos sąlygos, susitarimai ir komentarai': ['Additional terms, agreements and comments', 'Дополнительные условия, договорённости и комментарии'],
   'neprivaloma': ['optional', 'необязательно'],
 
@@ -925,7 +936,11 @@ $('addEdu').onclick = () => { addEdu(); qa('#eduList .rrow').pop().querySelector
 $('addKid').onclick = () => { addKid(); qa('#kidList .rrow').pop().querySelector('input').focus(); };
 
 /* ---------- conditional fields ---------- */
+const hourly = () => radio('hr_paytype') === 'Valandinis';
+const salUnit = () => hourly() ? 'Eur/val.' : 'Eur/mėn.';
 function applyShow(){
+  qa('.sal-unit').forEach(e => { e.textContent = T(salUnit()); });
+  $('salSub').textContent = T(hourly() ? 'Sumos eurais už valandą, neatskaičius mokesčių.' : 'Sumos eurais per mėnesį, neatskaičius mokesčių.');
   qa('[data-show]').forEach(el => {
     const [n,v] = el.dataset.show.split('=');
     el.hidden = radio(n) !== v;
@@ -1318,8 +1333,9 @@ function buildDoc(){
     ${radio('hr_term') === 'Terminuota' ? row('Sutarties pabaigos data', termEnd()) + row('Terminuotos sutarties aplinkybės', val('hr_termwhy')) : ''}
     ${row('Darbo laikas (etato dydis)', fte)}
     ${row('Ši darbovietė', radio('hr_main'))}
-    ${row('Darbo užmokestis bandomuoju laikotarpiu (Eur/mėn., neatskaičius mokesčių)', prob ? val('hr_sal1') : 'Bandomasis laikotarpis netaikomas')}
-    ${row(prob ? 'Darbo užmokestis po bandomojo laikotarpio (Eur/mėn., neatskaičius mokesčių)' : 'Darbo užmokestis (Eur/mėn., neatskaičius mokesčių)', val('hr_sal2'))}
+    ${row('Atlygio forma', radio('hr_paytype'))}
+    ${row(`Darbo užmokestis bandomuoju laikotarpiu (${salUnit()}, neatskaičius mokesčių)`, prob ? val('hr_sal1') : 'Bandomasis laikotarpis netaikomas')}
+    ${row(prob ? `Darbo užmokestis po bandomojo laikotarpio (${salUnit()}, neatskaičius mokesčių)` : `Darbo užmokestis (${salUnit()}, neatskaičius mokesčių)`, val('hr_sal2'))}
   </table>
 
   <h2>INFORMACIJA DARBO UŽMOKESČIUI APSKAIČIUOTI IR IŠMOKĖTI</h2>
@@ -1381,8 +1397,10 @@ function buildPdfDef(D){
   ];
   if (D.term === 'Terminuota') contract.push(kv('Sutarties pabaigos data', D.termEnd), kv('Terminuotos sutarties aplinkybės', D.termWhy));
   contract.push(kv('Darbo laikas (etato dydis)', D.fte), kv('Ši darbovietė', D.main));
-  contract.push(kv('Darbo užmokestis bandomuoju laikotarpiu (Eur/mėn., neatskaičius mokesčių)', D.prob ? D.sal1 : 'Bandomasis laikotarpis netaikomas'));
-  contract.push(kv(D.prob ? 'Darbo užmokestis po bandomojo laikotarpio (Eur/mėn., neatskaičius mokesčių)' : 'Darbo užmokestis (Eur/mėn., neatskaičius mokesčių)', D.sal2));
+  const U = D.payType === 'Valandinis' ? 'Eur/val.' : 'Eur/mėn.';
+  contract.push(kv('Atlygio forma', D.payType));
+  contract.push(kv(`Darbo užmokestis bandomuoju laikotarpiu (${U}, neatskaičius mokesčių)`, D.prob ? D.sal1 : 'Bandomasis laikotarpis netaikomas'));
+  contract.push(kv(D.prob ? `Darbo užmokestis po bandomojo laikotarpio (${U}, neatskaičius mokesčių)` : `Darbo užmokestis (${U}, neatskaičius mokesčių)`, D.sal2));
 
   return {
     pageSize: 'A4',
@@ -1464,7 +1482,7 @@ function collect(){
     pos: val('hr_pos'), dept: val('hr_dept'), start: val('hr_start'),
     term: radio('hr_term'), termEnd: termEnd(), termWhy: val('hr_termwhy'),
     fte: radio('hr_fte') === 'Kita' ? val('hr_fte_o') : radio('hr_fte'),
-    main: radio('hr_main'), prob, sal1: val('hr_sal1'), sal2: val('hr_sal2'),
+    main: radio('hr_main'), prob, payType: radio('hr_paytype'), sal1: val('hr_sal1'), sal2: val('hr_sal2'),
     npd: radio('emp_npd'), iban: outVal('emp_iban'),
     pay: radio('emp_pay') + (radio('emp_pay') === 'Du kartus per mėnesį' ? `; avansas ${val('emp_adv')} Eur` : ''),
     notes: val('hr_notes'),
