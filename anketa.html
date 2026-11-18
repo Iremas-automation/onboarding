@@ -250,6 +250,13 @@ a.btn.ghost{color:var(--ink)}
     <div class="field"><label for="hr_name">Darbuotojo vardas, pavardė</label><input id="hr_name" data-req autocapitalize="words"></div>
     <div class="field"><label for="hr_pos">Pareigos</label><input id="hr_pos" data-req></div>
     <div class="field"><label for="hr_dept">Padalinys / skyrius</label><input id="hr_dept" data-req></div>
+    <fieldset class="field"><legend>Filialas</legend>
+      <div class="chips" data-req-radio>
+        <label><input type="radio" name="hr_filialas" value="IREMAS"><span>IREMAS</span></label>
+        <label><input type="radio" name="hr_filialas" value="Letenerga"><span>Letenerga</span></label>
+        <label><input type="radio" name="hr_filialas" value="Projektų centras"><span>Projektų centras</span></label>
+      </div>
+    </fieldset>
     <div class="field"><label for="hr_start">Darbo pradžios data</label><input id="hr_start" type="date" data-req></div>
   </div>
 
@@ -589,6 +596,7 @@ const I18N = {
   'Darbuotojo vardas, pavardė': ['Employee’s full name', 'Имя и фамилия работника'],
   'Pareigos': ['Position', 'Должность'],
   'Padalinys / skyrius': ['Unit / department', 'Подразделение / отдел'],
+  'Filialas': ['Branch', 'Филиал'],
   'Darbo pradžios data': ['Start date', 'Дата начала работы'],
   'Sutarties terminas': ['Contract term', 'Срок договора'],
   'Neterminuota': ['Open-ended', 'Бессрочный'],
@@ -1328,6 +1336,7 @@ function buildDoc(){
   <table>
     ${row('Pareigos', val('hr_pos'))}
     ${row('Padalinys / skyrius', val('hr_dept'))}
+    ${row('Filialas', val('hr_filialas'))}
     ${row('Darbo pradžios data', val('hr_start'))}
     ${row('Sutarties terminas', radio('hr_term'))}
     ${radio('hr_term') === 'Terminuota' ? row('Sutarties pabaigos data', termEnd()) + row('Terminuotos sutarties aplinkybės', val('hr_termwhy')) : ''}
@@ -1392,7 +1401,7 @@ function buildPdfDef(D){
   leave.push(kv('Man nustatytas neįgalumas', yn(D.myDis, D.myDisDoc)));
 
   const contract = [
-    kv('Pareigos', D.pos), kv('Padalinys / skyrius', D.dept), kv('Darbo pradžios data', D.start),
+    kv('Pareigos', D.pos), kv('Padalinys / skyrius', D.dept), kv('Filialas', D.filialas), kv('Darbo pradžios data', D.start),
     kv('Sutarties terminas', D.term)
   ];
   if (D.term === 'Terminuota') contract.push(kv('Sutarties pabaigos data', D.termEnd), kv('Terminuotos sutarties aplinkybės', D.termWhy));
@@ -1463,8 +1472,10 @@ function buildPdfDef(D){
   };
 }
 function pdfFileName(D){
-  const n = (D.name || 'darbuotojas').replace(/[\\/:*?"<>|]+/g, '').trim().replace(/\s+/g, '_');
-  return `Darbuotojo_anketa_${n}_${D.date}.pdf`;
+  const clean = s => (s || '').replace(/[\\/:*?"<>|]+/g, '').trim().replace(/\s+/g, '_');
+  const n = clean(D.name) || 'darbuotojas';
+  const f = clean(D.filialas);
+  return `Darbuotojo_anketa_${f ? f + '_' : ''}${n}_${D.date}.pdf`;
 }
 
 function collect(){
@@ -1479,7 +1490,7 @@ function collect(){
     single: radio('emp_single'), singleDoc: detail('single'),
     kidDis: radio('emp_kiddis'), kidDisDoc: detail('kiddis'),
     myDis: radio('emp_mydis'), myDisDoc: detail('mydis'),
-    pos: val('hr_pos'), dept: val('hr_dept'), start: val('hr_start'),
+    pos: val('hr_pos'), dept: val('hr_dept'), filialas: radio('hr_filialas'), start: val('hr_start'),
     term: radio('hr_term'), termEnd: termEnd(), termWhy: val('hr_termwhy'),
     fte: radio('hr_fte') === 'Kita' ? val('hr_fte_o') : radio('hr_fte'),
     main: radio('hr_main'), prob, payType: radio('hr_paytype'), sal1: val('hr_sal1'), sal2: val('hr_sal2'),
@@ -1599,10 +1610,20 @@ async function sp(path, opts = {}, interactive = false){
   return res.status === 204 ? null : res.json();
 }
 const folderApi = path => `/_api/web/GetFolderByServerRelativePath(decodedurl='${encodeURIComponent(path.replace(/'/g, "''"))}')`;
-async function targetFolder(interactive){
+async function ensureSub(parent, name){
+  const sub = parent + '/' + name;
+  try { await sp(folderApi(sub) + '?$select=Name'); }
+  catch (e) {
+    if (e.status !== 404) throw e;
+    await sp(`/_api/web/folders/AddUsingPath(decodedurl='${encodeURIComponent(sub.replace(/'/g, "''"))}')`, {method: 'POST'});
+  }
+  return sub;
+}
+async function targetFolder(interactive, branch){
   let folder = CFG.folder;
   try { await sp(folderApi(folder) + '?$select=Name', {}, interactive); }
   catch (e) { if (e.status === 404) throw Object.assign(new Error('folder'), {status: 404}); throw e; }
+  if (branch) folder = await ensureSub(folder, branch);   // ANKETA/<Filialas>
   if (CFG.yearFolder){
     const sub = folder + '/' + TODAY.slice(0, 4);
     try { await sp(folderApi(sub) + '?$select=Name'); }
@@ -1614,8 +1635,8 @@ async function targetFolder(interactive){
   }
   return folder;
 }
-async function uploadPdf(blob, name, interactive){
-  const folder = await targetFolder(interactive);
+async function uploadPdf(blob, name, interactive, branch){
+  const folder = await targetFolder(interactive, branch);
   const f = await sp(folderApi(folder) +
     `/Files/AddUsingPath(decodedurl='${encodeURIComponent(name.replace(/'/g, "''"))}',overwrite=false)`,
     {method: 'POST', body: blob, headers: {'Content-Type': 'application/pdf'}});
@@ -1643,13 +1664,13 @@ async function saveToSharePoint(interactive){
   saving = true; $('retryBtn').hidden = true; $('editBtn').disabled = true;
   try {
     saveState('', 'Ruošiamas PDF…');
-    const {blob, name} = await makePdf();
+    const {blob, name, D} = await makePdf();
     if (demo || !account){
       saveState('bad', 'Neprisijungus anketa į SharePoint neišsaugoma. Atsisiųskite PDF kopiją.');
       return;
     }
     saveState('', 'Išsaugoma SharePoint…');
-    savedUrl = await uploadPdf(blob, name, !!interactive);
+    savedUrl = await uploadPdf(blob, name, !!interactive, D.filialas);
     saveState('ok', `Anketa išsaugota SharePoint: <a href="${esc(savedUrl)}" target="_blank" rel="noopener">${esc(name)}</a>`);
     $('editBtn').hidden = true;     // saved record is final; changes = new anketa
   } catch (e) {
